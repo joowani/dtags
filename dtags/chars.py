@@ -1,6 +1,7 @@
-"""Constants used throughout the lazy package."""
+"""Constants used throughout the dtags package."""
 
-ALLOWED_CHARS = {
+# Allowed characters for tag names
+TAG_NAME_CHARS = {
     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
     'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D',
     'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',

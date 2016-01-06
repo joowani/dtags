@@ -1,112 +1,88 @@
 #!/usr/bin/env python
 
 import os
-
 from argparse import ArgumentParser
-from argcomplete import autocomplete
 
-from dtags.colors import MAGENTA, CYAN, YELLOW, END
-from dtags.characters import ALLOWED_CHARS
-from dtags.formatters import HelpFormatter
-from dtags.completers import ChoicesCompleter
-from dtags.config import load_config, save_config
+from dtags.help import HelpFormatter
+from dtags.colors import PINK, CYAN, YELLOW, CLEAR
+from dtags.config import load_tags, save_tags
+from dtags.utils import expand_path
 
-description = """
-Untag specified directories.
+cmd_description = """
+dtags: untag directories.
 
-All tag names must be preceded by the {m}@{e} character.
-For example, after running {y}untag foo bar @a @b bar baz @c{e}:
+e.g. after running {y}untag ~/foo ~/bar @a @b ~/bar ~/baz @c{x}:
 
-    directory {c}foo{e} will no longer have tags {m}@a @b{e}
-    directory {c}bar{e} will no longer have tags {m}@a @b @c{e}
-    directory {c}baz{e} will no longer have tags {m}@c{e}
-""".format(m=MAGENTA, c=CYAN, y=YELLOW, e=END)
+    {c}~/foo{x} will no longer have tags {m}@a @b{x}
+    {c}~/bar{x} will no longer have tags {m}@a @b @c{x}
+    {c}~/baz{x} will no longer have tags {m}@c{x}
 
-message = "Removed tag {m}{{}}{e} from directory {c}{{}}{e}".format(
-    m=MAGENTA, c=CYAN, e=END
-)
+""".format(m=PINK, c=CYAN, y=YELLOW, x=CLEAR)
+
+msg = "Removed tag {m}{{}}{e} from {c}{{}}{e}".format(m=PINK, c=CYAN, e=CLEAR)
 
 
 def main():
-    config = load_config()
-    tags = config["tags"]
-    all_paths = set()
-    for paths in tags.values():
-        all_paths.update(paths)
-
+    tag_to_paths = load_tags()
     parser = ArgumentParser(
         prog="untag",
-        usage="untag [paths] [tags] ...",
-        description=description,
-        formatter_class=HelpFormatter
+        usage="untag [[paths] [tags] ... ]",
+        description=cmd_description,
+        formatter_class=HelpFormatter,
     )
     parser.add_argument(
         "arguments",
         type=str,
         nargs='+',
         metavar='[paths] [tags]',
-        help="directory paths followed by tag names"
-    ).completer = ChoicesCompleter(tags.keys() + list(all_paths))
-    autocomplete(parser)
-    arguments = parser.parse_args().arguments
+        help="directory paths and tag names"
+    )
+    parsed = parser.parse_args()
 
-    collected_tags = set()
-    collected_paths = set()
-    collecting_paths = True
+    # Tracking variables and collectors
+    updates = []
+    arg_index = 0
+    parsing_paths = True
+    tags_collected = set()
+    paths_collected = set()
 
-    def delete_collected():
-        for tag_name in collected_tags:
-            if tag_name in tags:
-                existing_paths = set(tags[tag_name])
-                for path in collected_paths:
-                    if path in existing_paths:
-                        tags[tag_name].remove(path)
-                        print(message.format(tag_name, path))
-                if len(tags[tag_name]) == 0:
-                    tags.pop(tag_name)
-        collected_paths.clear()
-        collected_tags.clear()
-
-    index = 0
-    while index < len(arguments):
-        arg = arguments[index]
-        if collecting_paths:
-            if arg.startswith('@'):
-                if not collected_paths:
-                    parser.error(
-                        "directory paths missing before '{}'".format(arg)
-                    )
-                collecting_paths = False
-            elif not os.path.isdir(arg):
-                parser.error("invalid directory path '{}'".format(arg))
-            else:
-                collected_paths.add(os.path.realpath(os.path.expanduser(arg)))
-                index += 1
+    # Iterate through the arguments and pair up tags with paths
+    while arg_index < len(parsed.arguments):
+        arg = parsed.arguments[arg_index]
+        if parsing_paths and arg.startswith('@'):
+            if len(paths_collected) == 0:
+                parser.error("excepting paths before {}".format(arg))
+            parsing_paths = False
+        elif parsing_paths and not arg.startswith('@'):
+            paths_collected.add(arg)
+            arg_index += 1
+        elif not parsing_paths and arg.startswith('@'):
+            tags_collected.add(arg)
+            arg_index += 1
         else:
-            if arg.startswith('@'):
-                tag = arg[1:]
-                if len(tag) == 0:
-                    parser.error("empty tag name")
-                has_alpha = False
-                for char in tag:
-                    if char not in ALLOWED_CHARS:
-                        parser.error("invalid character '{}' in tag name '@{}'"
-                                     .format(char, tag))
-                    if char.isalpha():
-                        has_alpha = True
-                if not has_alpha:
-                    parser.error("no alphabets in tag name '@{}'".format(tag))
-                collected_tags.add(arg)
-                index += 1
-            else:
-                delete_collected()
-                collecting_paths = True
+            updates.append((tags_collected, paths_collected))
+            tags_collected, paths_collected = set(), set()
+            parsing_paths = True
+    if parsing_paths:
+        parser.error("expecting a tag name")
+    updates.append((tags_collected, paths_collected))
 
-    if collecting_paths:
-        parser.error("expecting tags for the last argument")
-
-    delete_collected()
-    save_config(config)
-
-if __name__ == "__main__":
-    main()
+    # Apply updates and message
+    messages = set()
+    for tags, paths in updates:
+        for tag in tags:
+            if tag not in tag_to_paths:
+                continue
+            for path in paths:
+                if not os.path.isdir(path):
+                    continue
+                full_path = expand_path(path)
+                if full_path in tag_to_paths[tag]:
+                    tag_to_paths[tag].pop(full_path)
+                    messages.add(msg.format(tag, full_path))
+            if len(tag_to_paths[tag]) == 0:
+                # Remove the tag completely if it has no paths
+                tag_to_paths.pop(tag)
+    save_tags(tag_to_paths)
+    if messages:
+        print("\n".join(messages))

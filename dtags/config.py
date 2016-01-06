@@ -1,48 +1,46 @@
 import os
 import json
 
-from dtags.utils import halt
+from dtags.utils import halt, expand_path
 
-ROOT_PATH = os.path.expanduser('~/.dtags')
-CONFIG_PATH = os.path.join(ROOT_PATH, 'config')
-
-NEW_CONFIG = {
-    "tags": {}
-}
+TAGS = os.path.expanduser('~/.dtags')
 
 
-def load_config():
-    """Load the configuration from disk.
-
-    :return: configuration
-    """
-    if not os.path.exists(ROOT_PATH):
-        os.makedirs(ROOT_PATH)
-    if not os.path.exists(CONFIG_PATH):
+def load_tags():
+    """Load the tags from disk."""
+    if not os.path.exists(TAGS):
         try:
-            with open(CONFIG_PATH, "w") as fp:
-                json.dump(NEW_CONFIG, fp)
-                return NEW_CONFIG
+            with open(TAGS, "w") as config_file:
+                json.dump({}, config_file)
         except (IOError, OSError) as e:
-            halt("Failed to initialize config {}: {}"
-                 .format(CONFIG_PATH, e.strerror), e.errno)
-    try:
-        with open(CONFIG_PATH, "r") as fp:
-            data = fp.read().strip()
-            return {} if not data else json.loads(data)
-    except ValueError as e:
-        halt("Failed to load {}: {}".format(CONFIG_PATH, e.message))
-    except (IOError, OSError) as e:
-        halt("Failed to load {}: {}".format(CONFIG_PATH, e.strerror), e.errno)
+            halt("Failed to init {}: {}".format(TAGS, e.strerror), e.errno)
+    else:
+        try:
+            with open(TAGS, "r") as config_file:
+                json_str = config_file.read().strip()
+                tag_data = {} if not json_str else json.loads(json_str)
+                return {
+                    tag: {expand_path(path): path for path in paths}
+                    for tag, paths in tag_data.items()
+                }
+        except ValueError as e:
+            halt("Failed to load {}: {}".format(TAGS, e))
+        except (IOError, OSError) as e:
+            halt("Failed to load {}: {}".format(TAGS, e.strerror), e.errno)
 
 
-def save_config(config):
-    """Save the configuration to disk.
+def save_tags(tags):
+    """Save the tags to disk.
 
-    :param config: configuration
+    :param tags: tags to save
     """
-    try:  # Write the configuration to the disk
-        with open(CONFIG_PATH, "w") as fp:
-            json.dump(config, fp, indent=4, sort_keys=True)
+    try:
+        with open(TAGS, "w") as config_file:
+            json.dump(
+                {tag: sorted(paths.values()) for tag, paths in tags.items()},
+                config_file,
+                indent=4,
+                sort_keys=True
+            )
     except IOError as e:
-        halt("Failed to write to {}: {}".format(CONFIG_PATH, e.strerror))
+        halt("Failed to save {}: {}".format(TAGS, e.strerror))

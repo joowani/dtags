@@ -1,67 +1,177 @@
 #!/usr/bin/env python
+
 import os
+import sys
+import errno
+import signal
+import atexit
+import argparse
+import tempfile
 import subprocess
 from collections import OrderedDict
-from argparse import ArgumentParser, REMAINDER
 
-from argcomplete import autocomplete
+from dtags.colors import *
+from dtags.completion import ChoicesCompleter, autocomplete
+from dtags.config import load_tags
+from dtags.help import HelpFormatter
+from dtags.utils import expand_path
 
-from dtags.colors import MAGENTA, CYAN, END
-from dtags.config import load_config
-from dtags.completers import ChoicesCompleter
-from dtags.formatters import HelpFormatter
+tmp_file = None
+process = None
+processes = []
+command_description = """
+dtags: run commands in multiple directories.
+
+e.g. running {y}run @a @b ~/foo ~/bar ls -la{x} will:
+
+    execute {y}ls -la{x} in all directories with tag {m}@a{x}
+    execute {y}ls -la{x} in all directories with tag {m}@b{x}
+    execute {y}ls -la{x} in directory {c}~/foo{x}
+    execute {y}ls -la{x} in directory {c}~/bar{x}
+
+""".format(m=PINK, c=CYAN, y=YELLOW, x=CLEAR)
+
+
+def _print_header(tag, path):
+    """Print the run information header."""
+    tail = " ({}{}{}):".format(PINK, tag, CLEAR) if tag else ":"
+    print("{}{}{}{}".format(CYAN, path, tail, CLEAR))
+
+
+def _print_error(cmd, err):
+    """Print the error message."""
+    print("Failed to run {}{}{}: {}".format(YELLOW, cmd, CLEAR, err))
+
+
+def _print_exit_code(exit_code):
+    """Print the exit code from process."""
+    print("{}Exit code: {}{}".format(RED, exit_code, CLEAR))
+
+
+def _safe_kill(target_process):
+    """Send sigterm to the target (child) process."""
+    try:
+        os.killpg(os.getpgid(target_process.pid), signal.SIGTERM)
+    except OSError as err:
+        # If the process is already killed for some reason, do nothing
+        if err.errno != errno.ESRCH:
+            raise
+
+
+def _cleanup_resources():
+    """Kill child processes and remove temporary files."""
+    global tmp_file, process, processes
+    if tmp_file is not None:
+        tmp_file.close()
+    if process is not None:
+        _safe_kill(process)
+    for _, _, proc, tmp in processes:
+        _safe_kill(proc)
+        tmp.close()
+
+
+def _kill_signal_handler(signum, frame):
+    """Clean up resources when sigterm or sigint is received."""
+    _cleanup_resources()
+    sys.exit(127 + signum)
 
 
 def main():
-    tags = load_config()['tags']
-    parser = ArgumentParser(
+    global tmp_file, process, processes
+
+    # Ensure that child processes are cleaned up
+    signal.signal(signal.SIGINT, _kill_signal_handler)
+    signal.signal(signal.SIGTERM, _kill_signal_handler)
+    atexit.register(_cleanup_resources)
+
+    tag_to_paths = load_tags()
+    parser = argparse.ArgumentParser(
         prog="run",
-        description="Run commands in one or more directories",
-        usage="run [tags] [paths] command",
-        add_help=False,
-        formatter_class=HelpFormatter
+        description=command_description,
+        usage="run [options] [targets] cmd",
+        formatter_class=HelpFormatter,
+    )
+    parser.add_argument(
+        "-p", "--parallel",
+        help="run the commands in parallel",
+        action="store_true"
+    )
+    parser.add_argument(
+        "-e", "--exit-codes",
+        help="display exit codes",
+        action="store_true"
     )
     parser.add_argument(
         "arguments",
         type=str,
-        nargs=REMAINDER,
-        metavar='[tags] [paths] command',
-        help="tags and/or paths followed the command to run"
-    ).completer = ChoicesCompleter(tags.keys())
+        nargs=argparse.REMAINDER,
+        metavar='[targets] cmd',
+        help="tags and paths to run the command in"
+    ).completer = ChoicesCompleter(tag_to_paths.keys())
     autocomplete(parser)
-    arguments = parser.parse_args().arguments
-    if not arguments:
-        parser.error("too few arguments")
+    parsed = parser.parse_args()
 
+    # Separate the targets from the command
     index = 0
-    paths_and_tags = OrderedDict()
-    # Assume what is not a tag/path is the start of the command
-    while index < len(arguments):
-        arg = arguments[index]
-        if arg.startswith('@') and arg in tags:
-            for path in sorted(tags[arg]):
-                paths_and_tags[path] = arg
+    targets = OrderedDict()
+    while index < len(parsed.arguments):
+        target = parsed.arguments[index]
+        if target in tag_to_paths:
+            for path in sorted(tag_to_paths[target].keys()):
+                targets[path] = target
             index += 1
-        elif os.path.isdir(arg):
-            path = os.path.realpath(os.path.expanduser(arg))
-            if path not in paths_and_tags:
-                paths_and_tags[path] = None
+        elif target.startswith('@'):
+            parser.error("unknown tag {}".format(target))
+        elif os.path.isdir(target):
+            path = expand_path(target)
+            if path not in targets:
+                targets[path] = None
             index += 1
         else:
-            break
-    command = arguments[index:]
-    if not command:
+            break  # beginning of the command
+    command = " ".join(parsed.arguments[index:])
+    if not (targets and command):
         parser.error("too few arguments")
 
-    for path, tag in paths_and_tags.items():
-        print "{start}{path}{end}{tail}".format(
-            start=CYAN,
-            path=path,
-            tail=" ({}{}{}):".format(MAGENTA, tag, END) if tag else ":",
-            end=END,
-        )
-        subprocess.call(command, cwd=path)
-        print("")
+    exit_code = 0
+    if parsed.parallel:
+        # Run the command in parallel
+        for path, tag in targets.items():
+            tmp_file = tempfile.TemporaryFile(mode='w+t')
+            process = subprocess.Popen(
+                command,
+                cwd=path,
+                stdout=tmp_file,
+                stderr=tmp_file,
+                shell=True,
+                preexec_fn=os.setsid
+            )
+            processes.append((path, tag, process, tmp_file))
 
-if __name__ == '__main__':
-    main()
+        for path, tag, process, tmp_file in processes:
+            child_exit_code = process.wait()
+            tmp_file.seek(0)
+            _print_header(tag, path)
+            print(tmp_file.read().rstrip("\n"))
+            if child_exit_code != 0:
+                exit_code = 1
+            if parsed.exit_codes:
+                _print_exit_code(child_exit_code)
+            print("")
+            tmp_file.close()
+    else:
+        # Run the command sequentially
+        for path, tag in targets.items():
+            _print_header(tag, path)
+            child_exit_code = subprocess.call(
+                command,
+                cwd=path,
+                shell=True,
+                stderr=sys.stdout.fileno()
+            )
+            if child_exit_code != 0:
+                exit_code = 1
+            if parsed.exit_codes:
+                _print_exit_code(child_exit_code)
+            print("")
+    sys.exit(exit_code)
