@@ -4,7 +4,6 @@ setup(
     name="dtags",
     version="1.0.1",
     description="Directory tags for lazy programmers",
-    long_description=open('README.md').read(),
     author="Joohwan Oh",
     author_email="joohwan.oh@outlook.com",
     url="https://github.com/joowani/dtags",
