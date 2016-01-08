@@ -18,7 +18,11 @@ def load_tags():
         try:
             with open(TAGS, "r") as config_file:
                 json_str = config_file.read().strip()
-                tag_data = {} if not json_str else json.loads(json_str)
+                if not json_str:
+                    return {}
+                tag_data = json.loads(json_str)
+                if not tag_data:
+                    return {}
                 return {
                     tag: {expand_path(path): path for path in paths}
                     for tag, paths in tag_data.items()
