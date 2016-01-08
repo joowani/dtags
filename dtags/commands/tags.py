@@ -6,14 +6,14 @@ import json
 from collections import defaultdict
 from argparse import ArgumentParser
 
-from dtags.colors import MAGENTA, CYAN, CLEAR
-from dtags.completion import choices, autocomplete
-from dtags.config import load_config
+from dtags.colors import PINK, CYAN, CLEAR
+from dtags.completion import ChoicesCompleter, autocomplete
+from dtags.config import load_tags
 from dtags.utils import expand_path
 
 
 def main():
-    tag_to_paths = load_config()
+    tag_to_paths = load_tags()
     path_to_tags = defaultdict(set)
     for tag, paths in tag_to_paths.items():
         for path in paths.keys():
@@ -21,7 +21,7 @@ def main():
 
     parser = ArgumentParser(
         prog="tags",
-        description="Display tagged directories.",
+        description="dtags: display tags and tagged directories",
         usage="tags [options] [paths] [tags]",
     )
     parser.add_argument(
@@ -45,7 +45,7 @@ def main():
         nargs='*',
         metavar="[paths] [tags]",
         help="tag and/or directory paths to search",
-    ).completer = choices(tag_to_paths.keys())
+    ).completer = ChoicesCompleter(tag_to_paths.keys())
     autocomplete(parser)
     parsed = parser.parse_args()
 
@@ -74,7 +74,7 @@ def main():
                             filtered[tag] = tag_to_paths[tag].values()
 
     if parsed.json:
-        formatted = {tag: paths for tag, paths in filtered.items()}
+        formatted = {tag: sorted(paths) for tag, paths in filtered.items()}
         print(json.dumps(formatted, sort_keys=True, indent=4))
     elif parsed.reverse:
         reverse = defaultdict(set)
@@ -83,8 +83,8 @@ def main():
                 reverse[path].add(tag)
         for path, tags in reverse.items():
             print("{}{}{}".format(CYAN, path, CLEAR))
-            print("{}{}{}\n".format(MAGENTA, " ".join(sorted(tags)), CLEAR))
+            print("{}{}{}\n".format(PINK, " ".join(sorted(tags)), CLEAR))
     else:
         for tag, paths in sorted(filtered.items()):
-            print("{}{}{}".format(MAGENTA, tag, CLEAR))
+            print("{}{}{}".format(PINK, tag, CLEAR))
             print("{}{}{}\n".format(CYAN, "\n".join(sorted(paths)), CLEAR))

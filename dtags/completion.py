@@ -1,4 +1,4 @@
-"""All things related to auto-completion."""
+"""All the things related to auto-completion."""
 
 from argcomplete import CompletionFinder
 
@@ -21,4 +21,3 @@ class ChoicesCompleter(object):
         return (c for c in self.choices if c.startswith(prefix))
 
 autocomplete = DTagsCompletionFinder()
-choices = ChoicesCompleter

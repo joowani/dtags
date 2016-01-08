@@ -12,7 +12,7 @@ from collections import OrderedDict
 
 from dtags.colors import *
 from dtags.completion import ChoicesCompleter, autocomplete
-from dtags.config import load_config
+from dtags.config import load_tags
 from dtags.help import HelpFormatter
 from dtags.utils import expand_path
 
@@ -20,23 +20,21 @@ tmp_file = None
 process = None
 processes = []
 command_description = """
-Run commands in multiple directories.
+dtags: run commands in multiple directories.
 
-Targets can either by tag names or directory paths.
-All tag names must be preceded by the {m}@{x} character.
-For example, {y}run @a @b ~/foo ~/bar ls -la{x} will run:
+e.g. running {y}run @a @b ~/foo ~/bar ls -la{x} will:
 
-    {y}ls -la{x} in all directories tagged {m}@a{x}
-    {y}ls -la{x} in all directories tagged {m}@b{x}
-    {y}ls -la{x} in directory {c}~/foo{x}
-    {y}ls -la{x} in directory {c}~/bar{x}
+    execute {y}ls -la{x} in all directories with tag {m}@a{x}
+    execute {y}ls -la{x} in all directories with tag {m}@b{x}
+    execute {y}ls -la{x} in directory {c}~/foo{x}
+    execute {y}ls -la{x} in directory {c}~/bar{x}
 
-""".format(m=MAGENTA, c=CYAN, y=YELLOW, x=CLEAR)
+""".format(m=PINK, c=CYAN, y=YELLOW, x=CLEAR)
 
 
 def _print_header(tag, path):
     """Print the run information header."""
-    tail = " ({}{}{}):".format(MAGENTA, tag, CLEAR) if tag else ":"
+    tail = " ({}{}{}):".format(PINK, tag, CLEAR) if tag else ":"
     print("{}{}{}{}".format(CYAN, path, tail, CLEAR))
 
 
@@ -86,7 +84,7 @@ def main():
     signal.signal(signal.SIGTERM, _kill_signal_handler)
     atexit.register(_cleanup_resources)
 
-    tag_to_paths = load_config()
+    tag_to_paths = load_tags()
     parser = argparse.ArgumentParser(
         prog="run",
         description=command_description,
@@ -139,7 +137,7 @@ def main():
     if parsed.parallel:
         # Run the command in parallel
         for path, tag in targets.items():
-            tmp_file = tempfile.TemporaryFile()
+            tmp_file = tempfile.TemporaryFile(mode='w+t')
             process = subprocess.Popen(
                 command,
                 cwd=path,

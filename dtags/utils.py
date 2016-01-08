@@ -70,5 +70,6 @@ def shrink_path(path):
 
     :return: shortened path
     """
+    path = expand_path(path)
     home = expand_path("~")
     return path.replace(home, "~") if path.startswith(home) else path

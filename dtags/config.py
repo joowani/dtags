@@ -3,20 +3,20 @@ import json
 
 from dtags.utils import halt, expand_path
 
-CONFIG = os.path.expanduser('~/.dtags')
+TAGS = os.path.expanduser('~/.dtags')
 
 
-def load_config():
-    """Load the configuration from disk."""
-    if not os.path.exists(CONFIG):
+def load_tags():
+    """Load the tags from disk."""
+    if not os.path.exists(TAGS):
         try:
-            with open(CONFIG, "w") as config_file:
+            with open(TAGS, "w") as config_file:
                 json.dump({}, config_file)
         except (IOError, OSError) as e:
-            halt("Failed to init {}: {}".format(CONFIG, e.strerror), e.errno)
+            halt("Failed to init {}: {}".format(TAGS, e.strerror), e.errno)
     else:
         try:
-            with open(CONFIG, "r") as config_file:
+            with open(TAGS, "r") as config_file:
                 json_str = config_file.read().strip()
                 tag_data = {} if not json_str else json.loads(json_str)
                 return {
@@ -24,23 +24,23 @@ def load_config():
                     for tag, paths in tag_data.items()
                 }
         except ValueError as e:
-            halt("Failed to load {}: {}".format(CONFIG, e.message))
+            halt("Failed to load {}: {}".format(TAGS, e))
         except (IOError, OSError) as e:
-            halt("Failed to load {}: {}".format(CONFIG, e.strerror), e.errno)
+            halt("Failed to load {}: {}".format(TAGS, e.strerror), e.errno)
 
 
-def save_config(config):
-    """Save the configuration to disk.
+def save_tags(tags):
+    """Save the tags to disk.
 
-    :param config: configuration
+    :param tags: tags to save
     """
     try:
-        with open(CONFIG, "w") as config_file:
+        with open(TAGS, "w") as config_file:
             json.dump(
-                {tag: paths.values() for tag, paths in config.items()},
+                {tag: sorted(paths.values()) for tag, paths in tags.items()},
                 config_file,
                 indent=4,
                 sort_keys=True
             )
     except IOError as e:
-        halt("Failed to save {}: {}".format(CONFIG, e.strerror))
+        halt("Failed to save {}: {}".format(TAGS, e.strerror))
