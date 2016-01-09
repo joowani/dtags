@@ -147,17 +147,15 @@ def main():
                 preexec_fn=os.setsid
             )
             processes.append((path, tag, process, tmp_file))
-
         for path, tag, process, tmp_file in processes:
             child_exit_code = process.wait()
             tmp_file.seek(0)
             _print_header(tag, path)
-            print(tmp_file.read().rstrip("\n"))
+            print(tmp_file.read())
             if child_exit_code != 0:
                 exit_code = 1
             if parsed.exit_codes:
                 _print_exit_code(child_exit_code)
-            print("")
             tmp_file.close()
     else:
         # Run the command sequentially
