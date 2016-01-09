@@ -19,17 +19,17 @@ from dtags.utils import expand_path
 tmp_file = None
 process = None
 processes = []
-command_description = """
-dtags: run commands in multiple directories.
+cmd_description = """
+dtags - run commands in directories
 
-e.g. running {y}run @a @b ~/foo ~/bar ls -la{x} will:
+e.g. the command {y}run @a @b ~/foo ~/bar ls -la{x}:
 
-    execute {y}ls -la{x} in all directories with tag {m}@a{x}
-    execute {y}ls -la{x} in all directories with tag {m}@b{x}
-    execute {y}ls -la{x} in directory {c}~/foo{x}
-    execute {y}ls -la{x} in directory {c}~/bar{x}
+    runs {y}ls -la{x} in all directories with tag {p}@a{x}
+    runs {y}ls -la{x} in all directories with tag {p}@b{x}
+    runs {y}ls -la{x} in directory {c}~/foo{x}
+    runs {y}ls -la{x} in directory {c}~/bar{x}
 
-""".format(m=PINK, c=CYAN, y=YELLOW, x=CLEAR)
+""".format(p=PINK, c=CYAN, y=YELLOW, x=CLEAR)
 
 
 def _print_header(tag, path):
@@ -49,7 +49,7 @@ def _print_exit_code(exit_code):
 
 
 def _safe_kill(target_process):
-    """Send sigterm to the target (child) process."""
+    """Send sigterm to the target child process."""
     try:
         os.killpg(os.getpgid(target_process.pid), signal.SIGTERM)
     except OSError as err:
@@ -87,9 +87,9 @@ def main():
     tag_to_paths = load_tags()
     parser = argparse.ArgumentParser(
         prog="run",
-        description=command_description,
+        description=cmd_description,
         usage="run [options] [targets] cmd",
-        formatter_class=HelpFormatter,
+        formatter_class=HelpFormatter
     )
     parser.add_argument(
         "-p", "--parallel",
@@ -106,7 +106,7 @@ def main():
         type=str,
         nargs=argparse.REMAINDER,
         metavar='[targets] cmd',
-        help="tags and paths to run the command in"
+        help="tags or paths to run the command for"
     ).completer = ChoicesCompleter(tag_to_paths.keys())
     autocomplete(parser)
     parsed = parser.parse_args()
