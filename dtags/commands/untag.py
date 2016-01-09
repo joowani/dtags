@@ -9,26 +9,26 @@ from dtags.config import load_tags, save_tags
 from dtags.utils import expand_path
 
 cmd_description = """
-dtags: untag directories.
+dtags - untag directories
 
-e.g. after running {y}untag ~/foo ~/bar @a @b ~/bar ~/baz @c{x}:
+e.g. the command {y}untag ~/foo ~/bar @a @b ~/baz @c @d{x}:
 
-    {c}~/foo{x} will no longer have tags {m}@a @b{x}
-    {c}~/bar{x} will no longer have tags {m}@a @b @c{x}
-    {c}~/baz{x} will no longer have tags {m}@c{x}
+    removes from directory {c}~/foo{x} tags {p}@a @b{x}
+    removes from directory {c}~/bar{x} tags {p}@a @b{x}
+    removes from directory {c}~/baz{x} tags {p}@c @d{x}
 
-""".format(m=PINK, c=CYAN, y=YELLOW, x=CLEAR)
+""".format(p=PINK, c=CYAN, y=YELLOW, x=CLEAR)
 
-msg = "Removed tag {m}{{}}{e} from {c}{{}}{e}".format(m=PINK, c=CYAN, e=CLEAR)
+msg = "Removed tag {p}{{}}{x} from {c}{{}}{x}".format(p=PINK, c=CYAN, x=CLEAR)
 
 
 def main():
     tag_to_paths = load_tags()
     parser = ArgumentParser(
         prog="untag",
-        usage="untag [[paths] [tags] ... ]",
+        usage="untag [[paths] [tags]...]",
         description=cmd_description,
-        formatter_class=HelpFormatter,
+        formatter_class=HelpFormatter
     )
     parser.add_argument(
         "arguments",

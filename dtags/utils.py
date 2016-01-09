@@ -68,6 +68,7 @@ def expand_path(path):
 def shrink_path(path):
     """Shrink the 'home' portion of the path to '~'.
 
+    :param path: a valid directory path
     :return: shortened path
     """
     path = expand_path(path)

@@ -1,15 +1,28 @@
 #!/usr/bin/env python
 
 import os
+import sys
 import json
 
 from collections import defaultdict
 from argparse import ArgumentParser
 
-from dtags.colors import PINK, CYAN, CLEAR
+from dtags.colors import PINK, CYAN, YELLOW, CLEAR
 from dtags.completion import ChoicesCompleter, autocomplete
 from dtags.config import load_tags
+from dtags.help import HelpFormatter
 from dtags.utils import expand_path
+
+cmd_description = """
+dtags - display tags and tagged directories
+
+e.g. the command {y}tags @a @b ~/foo ~/bar @c{x}:
+
+    displays tags {p}@a @b @c{x}
+    displays all tags with directory {c}~/foo{x}
+    displays all tags with directory {c}~/bar{x}
+
+""".format(p=PINK, c=CYAN, y=YELLOW, x=CLEAR)
 
 
 def main():
@@ -21,8 +34,9 @@ def main():
 
     parser = ArgumentParser(
         prog="tags",
-        description="dtags: display tags and tagged directories",
+        description=cmd_description,
         usage="tags [options] [paths] [tags]",
+        formatter_class=HelpFormatter
     )
     parser.add_argument(
         "-e", "--expand",
@@ -31,7 +45,7 @@ def main():
     )
     parser.add_argument(
         "-r", "--reverse",
-        help="display tags to directories",
+        help="display the reverse mapping",
         action="store_true"
     )
     parser.add_argument(
@@ -44,10 +58,14 @@ def main():
         type=str,
         nargs='*',
         metavar="[paths] [tags]",
-        help="tag and/or directory paths to search",
+        help="tag and directory paths to filter by"
     ).completer = ChoicesCompleter(tag_to_paths.keys())
     autocomplete(parser)
     parsed = parser.parse_args()
+
+    if len(tag_to_paths) == 0:
+        print("No tags found! You can add them by running the 'tag' command.")
+        sys.exit(0)
 
     # Filter by any given tags and paths
     # TODO optimize here if possible
