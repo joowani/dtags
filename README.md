@@ -1,6 +1,6 @@
 # DTags 
 Directory tags for lazy programmers.
-Written in Python, inspired by [gr](https://github.com/mixu/gr)
+Written in Python, inspired by [gr](https://github.com/mixu/gr).
 
 ## Introduction
 
@@ -32,6 +32,7 @@ Then you can run commands like this:
 ```bash
 > run @project git status -sb
 > run @vms vagrant up
+> run -p @frontend ls -la
 ```
 
 You can even run the commands in parallel (but you lose text colors):
@@ -48,8 +49,10 @@ display them in a variety of ways:
 > tags --expand             # expand home
 > tags --reverse            # show the reverse mapping
 ```
+You can also use the `--edit` option to edit the configuration file directly.
 
-With the `--json` option you can export your dtag config in a flexible manner:
+
+With the `--json` option you can export your dtags config in a flexible manner:
 ```bash
 > tags --json @only @the @ones @she @needs > export_file
 ```
@@ -59,6 +62,8 @@ To remove the tags you don't need anymore:
 ```bash
 > untag ~/frontend ~/backend ~/tools ~/scripts @project ~/backend @backend
 > untag ~/vms/web ~/vms/db ~/vms/api @vms ~/has/many/tags @foo @bar
+> untag --all @backend   # removes the tag completely
+> untag --all ~/vms/web  # removes the path from all tags
 ```
 
 If you need more help you can always use the `--help` option for any of the 
@@ -73,14 +78,18 @@ you to enable it (so you don't have to type the `@` symbol all the time).
 If you use **bash**, place the following lines in your **~/.bashrc** 
 (or **~/.bash_profile** for OS X):
 ```bash
-eval "$(register-python-argcomplete run)"                                                                                                        
-eval "$(register-python-argcomplete tags)"                                        
+if command -v register-python-argcomplete > /dev/null 2>&1; then
+    eval "$(register-python-argcomplete run)"                                                                                                        
+    eval "$(register-python-argcomplete tags)"
+fi
 ```
 
 If you use **zsh**, place the following lines in your **~/.zshrc**: 
 ```bash                                                                                  
 autoload bashcompinit                                                           
 bashcompinit 
-eval "$(register-python-argcomplete run)"                                                                                                      
-eval "$(register-python-argcomplete tags)"                                      
+if command -v register-python-argcomplete > /dev/null 2>&1; then
+    eval "$(register-python-argcomplete run)"                                                                                                      
+    eval "$(register-python-argcomplete tags)"
+fi
 ```
