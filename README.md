@@ -32,13 +32,14 @@ Then you can run commands like this:
 ```bash
 > run @project git status -sb
 > run @vms vagrant up
-> run -p @frontend ls -la
+> run @frontend ls -la
 ```
 
-You can even run the commands in parallel (but you lose text colors):
+You can even run the commands in parallel:
 ```bash
 > run -p @project git pull
 > run -p @vms vagrant up
+> run -p @backend 'sleep 5 && echo done'
 ```
 
 If you want an overview of all your tags, you can use the command `tags` to
@@ -52,11 +53,12 @@ display them in a variety of ways:
 You can also use the `--edit` option to edit the configuration file directly.
 
 
+
 With the `--json` option you can export your dtags config in a flexible manner:
 ```bash
-> tags --json @only @the @ones @she @needs > export_file
+> tags --json @only @the @ones @your @friend @needs > export_file
 ```
-You can then place the export file in `~/.dtags` for any other users or hosts!
+You can then place the export file in `~/.dtags` for any other users or hosts to reuse the tags!
 
 To remove the tags you don't need anymore:
 ```bash
