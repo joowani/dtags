@@ -9,5 +9,5 @@ class HelpFormatter(RawDescriptionHelpFormatter):
     def _format_action(self, action):
         parts = super(RawDescriptionHelpFormatter, self)._format_action(action)
         if action.nargs == PARSER:
-            return "\n".join(parts.split("\n")[1:])
+            return '\n'.join(parts.split('\n')[1:])
         return parts

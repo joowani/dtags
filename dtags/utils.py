@@ -72,5 +72,32 @@ def shrink_path(path):
     :return: shortened path
     """
     path = expand_path(path)
-    home = expand_path("~")
-    return path.replace(home, "~") if path.startswith(home) else path
+    home = expand_path('~')
+    return path.replace(home, '~') if path.startswith(home) else path
+
+
+def msgify(exception):
+    """Format the exception message.
+
+    1. Convert any capital characters to lowercase
+    2. Strip any periods or newlines
+
+    :param exception: the exception whose message to msgify
+    :return: msgified string
+    """
+    string = str(exception)
+    string = string if len(string) == 0 else string[0].lower() + string[1:]
+    return string.strip('.')
+
+
+def safe_remove(path):
+    """Remove a file safely.
+
+    If the file does not exist, then do nothing.
+
+    :param path: path of the file to remove
+    """
+    try:
+        os.remove(path)
+    except OSError:
+        pass

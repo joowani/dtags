@@ -34,24 +34,24 @@ e.g. the command {y}run @a @b ~/foo ~/bar ls -la{x}:
 
 def _print_header(tag, path):
     """Print the run information header."""
-    tail = " ({}{}{}):".format(PINK, tag, CLEAR) if tag else ":"
-    print("{}{}{}{}".format(CYAN, path, tail, CLEAR))
+    tail = ' ({}{}{}):'.format(PINK, tag, CLEAR) if tag else ':'
+    print('{}{}{}{}'.format(CYAN, path, tail, CLEAR))
 
 
 def _print_error(cmd, err):
     """Print the error message."""
-    print("Failed to run {}{}{}: {}".format(YELLOW, cmd, CLEAR, err))
+    print('Failed to run {}{}{}: {}'.format(YELLOW, cmd, CLEAR, err))
 
 
 def _print_exit_code(exit_code):
     """Print the exit code from process."""
-    print("{}Exit code: {}{}".format(RED, exit_code, CLEAR))
+    print('{}Exit Code: {}{}'.format(RED, exit_code, CLEAR))
 
 
-def _safe_kill(target_process):
+def _send_sigterm(target_process):
     """Send sigterm to the target child process."""
     try:
-        os.killpg(os.getpgid(target_process.pid), signal.SIGTERM)
+        os.killpg(os.getpgid(target_process.pid), signal.SIGKILL)
     except OSError as err:
         # If the process is already killed for some reason, do nothing
         if err.errno != errno.ESRCH:
@@ -64,9 +64,9 @@ def _cleanup_resources():
     if tmp_file is not None:
         tmp_file.close()
     if process is not None:
-        _safe_kill(process)
+        _send_sigterm(process)
     for _, _, proc, tmp in processes:
-        _safe_kill(proc)
+        _send_sigterm(proc)
         tmp.close()
 
 
@@ -86,27 +86,27 @@ def main():
 
     tag_to_paths = load_tags()
     parser = argparse.ArgumentParser(
-        prog="run",
+        prog='run',
         description=cmd_description,
-        usage="run [options] [targets] cmd",
+        usage='run [options] [targets] command',
         formatter_class=HelpFormatter
     )
     parser.add_argument(
-        "-p", "--parallel",
-        help="run the commands in parallel",
-        action="store_true"
+        '-p', '--parallel',
+        help='run the commands in parallel',
+        action='store_true'
     )
     parser.add_argument(
-        "-e", "--exit-codes",
-        help="display exit codes",
-        action="store_true"
+        '-e', '--exit-codes',
+        help='display exit codes',
+        action='store_true'
     )
     parser.add_argument(
-        "arguments",
+        'arguments',
         type=str,
         nargs=argparse.REMAINDER,
-        metavar='[targets] cmd',
-        help="tags or paths to run the command for"
+        metavar='[targets]',
+        help='tags or paths to run the command for'
     ).completer = ChoicesCompleter(tag_to_paths.keys())
     autocomplete(parser)
     parsed = parser.parse_args()
@@ -121,7 +121,7 @@ def main():
                 targets[path] = target
             index += 1
         elif target.startswith('@'):
-            parser.error("unknown tag {}".format(target))
+            parser.error('unknown tag {}'.format(target))
         elif os.path.isdir(target):
             path = expand_path(target)
             if path not in targets:
@@ -129,9 +129,9 @@ def main():
             index += 1
         else:
             break  # beginning of the command
-    command = " ".join(parsed.arguments[index:])
+    command = ' '.join(parsed.arguments[index:])
     if not (targets and command):
-        parser.error("too few arguments")
+        parser.error('too few arguments')
 
     exit_code = 0
     if parsed.parallel:
@@ -152,11 +152,12 @@ def main():
             tmp_file.seek(0)
             _print_header(tag, path)
             print(tmp_file.read())
+            tmp_file.close()
             if child_exit_code != 0:
                 exit_code = 1
             if parsed.exit_codes:
                 _print_exit_code(child_exit_code)
-            tmp_file.close()
+            print('')
     else:
         # Run the command sequentially
         for path, tag in targets.items():
@@ -171,5 +172,5 @@ def main():
                 exit_code = 1
             if parsed.exit_codes:
                 _print_exit_code(child_exit_code)
-            print("")
+            print('')
     sys.exit(exit_code)

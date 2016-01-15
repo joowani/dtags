@@ -3,15 +3,18 @@
 import os
 import sys
 import json
+import shutil
+import subprocess
 
 from collections import defaultdict
 from argparse import ArgumentParser
 
+from dtags.config import TAGS_FILE_PATH
 from dtags.colors import PINK, CYAN, YELLOW, CLEAR
 from dtags.completion import ChoicesCompleter, autocomplete
-from dtags.config import load_tags
+from dtags.config import load_tags, check_tags, save_tags
 from dtags.help import HelpFormatter
-from dtags.utils import expand_path
+from dtags.utils import halt, expand_path, shrink_path, msgify, safe_remove
 
 cmd_description = """
 dtags - display tags and tagged directories
@@ -33,38 +36,68 @@ def main():
             path_to_tags[path].add(tag)
 
     parser = ArgumentParser(
-        prog="tags",
+        prog='tags',
         description=cmd_description,
-        usage="tags [options] [paths] [tags]",
+        usage='tags [options] [paths] [tags]',
         formatter_class=HelpFormatter
     )
     parser.add_argument(
-        "-e", "--expand",
-        action="store_true",
-        help="Expand the directory paths"
+        '-e', '--edit',
+        action='store_true',
+        help='Edit the tags directly using an editor'
     )
     parser.add_argument(
-        "-r", "--reverse",
-        help="display the reverse mapping",
-        action="store_true"
+        '-x', '--expand',
+        action='store_true',
+        help='Expand the directory paths'
     )
     parser.add_argument(
-        "-j", "--json",
-        help="display the raw JSON",
-        action="store_true"
+        '-r', '--reverse',
+        help='display the reverse mapping',
+        action='store_true'
     )
     parser.add_argument(
-        "search_terms",
+        '-j', '--json',
+        help='display the raw JSON',
+        action='store_true'
+    )
+    parser.add_argument(
+        'search_terms',
         type=str,
         nargs='*',
-        metavar="[paths] [tags]",
-        help="tag and directory paths to filter by"
+        metavar='[paths] [tags]',
+        help='tag and directory paths to filter by'
     ).completer = ChoicesCompleter(tag_to_paths.keys())
     autocomplete(parser)
     parsed = parser.parse_args()
 
+    if parsed.edit:
+        edit_file_path = TAGS_FILE_PATH + '.edit'
+        shutil.copy2(TAGS_FILE_PATH, edit_file_path)
+        subprocess.call([os.environ.get('EDITOR', 'vi'), edit_file_path])
+        new_tag_to_paths = save_error = None
+        with open(edit_file_path, 'r') as edit_file:
+            try:
+                new_tag_to_paths = json.load(edit_file)
+            except ValueError as err:
+                save_error = 'Failed to save tags: {}'.format(msgify(err))
+            else:
+                try:
+                    check_tags(new_tag_to_paths)
+                except ValueError as err:
+                    save_error = 'Failed to save tags: {}'.format(err)
+        safe_remove(edit_file_path)
+        if save_error is not None:
+            halt(save_error)
+        save_tags({
+            tag: {expand_path(p): shrink_path(p) for p in paths}
+            for tag, paths in new_tag_to_paths.items()
+        })
+        print('New tags saved successfully')
+        sys.exit(0)
+
     if len(tag_to_paths) == 0:
-        print("No tags found! You can add them by running the 'tag' command.")
+        print('No tags defined')
         sys.exit(0)
 
     # Filter by any given tags and paths
@@ -100,9 +133,9 @@ def main():
             for path in paths:
                 reverse[path].add(tag)
         for path, tags in reverse.items():
-            print("{}{}{}".format(CYAN, path, CLEAR))
-            print("{}{}{}\n".format(PINK, " ".join(sorted(tags)), CLEAR))
+            print('{}{}{}'.format(CYAN, path, CLEAR))
+            print('{}{}{}\n'.format(PINK, ' '.join(sorted(tags)), CLEAR))
     else:
         for tag, paths in sorted(filtered.items()):
-            print("{}{}{}".format(PINK, tag, CLEAR))
-            print("{}{}{}\n".format(CYAN, "\n".join(sorted(paths)), CLEAR))
+            print('{}{}{}'.format(PINK, tag, CLEAR))
+            print('{}{}{}\n'.format(CYAN, '\n'.join(sorted(paths)), CLEAR))
