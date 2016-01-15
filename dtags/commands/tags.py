@@ -72,6 +72,8 @@ def main():
     parsed = parser.parse_args()
 
     if parsed.edit:
+        if parsed.search_terms:
+            raise parser.error('no arguments allowed with option -e/--edit')
         edit_file_path = TAGS_FILE_PATH + '.edit'
         shutil.copy2(TAGS_FILE_PATH, edit_file_path)
         subprocess.call([os.environ.get('EDITOR', 'vi'), edit_file_path])

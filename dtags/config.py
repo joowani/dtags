@@ -102,4 +102,6 @@ def check_tags(tags):
             raise ValueError('expecting a non-empty list for {}'.format(tag))
         for path in paths:
             if not (is_str(path) and os.path.isdir(expand_path(path))):
-                raise ValueError('invalid directory path for {}'.format(tag))
+                raise ValueError(
+                    'invalid directory path {} for {}'.format(path, tag)
+                )

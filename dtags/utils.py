@@ -6,7 +6,7 @@ import errno
 import importlib
 from sys import stderr
 
-from collections import Mapping, Iterable
+from collections import Mapping
 # Importing this way for python 2 and 3 compatibility
 try:
     urllib = importlib.import_module('urllib.parse')
@@ -34,7 +34,7 @@ def is_list(obj):
     :param obj: object to check
     :return: True if iterable, else False
     """
-    return isinstance(obj, Iterable)
+    return type(obj) == list
 
 
 def is_dict(obj):
