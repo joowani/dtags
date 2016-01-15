@@ -20,23 +20,23 @@ e.g. the command {y}tag ~/foo ~/bar @a @b ~/baz @a @c{x}:
 
 """.format(p=PINK, c=CYAN, y=YELLOW, x=CLEAR)
 
-msg = "Added tag {p}{{}}{x} to {c}{{}}{x}".format(p=PINK, c=CYAN, x=CLEAR)
+msg = 'Added tag {p}{{}}{x} to {c}{{}}{x}'.format(p=PINK, c=CYAN, x=CLEAR)
 
 
 def main():
     tag_to_paths = load_tags()
     parser = ArgumentParser(
-        prog="tag",
-        usage="tag [[paths] [tags]...]",
+        prog='tag',
+        usage='tag [[paths] [tags]...]',
         description=cmd_description,
         formatter_class=HelpFormatter
     )
     parser.add_argument(
-        "arguments",
+        'arguments',
         type=str,
         nargs='+',
         metavar='[paths] [tags]',
-        help="directory paths and tag names"
+        help='directory paths and tag names'
     )
     parsed = parser.parse_args()
 
@@ -52,7 +52,7 @@ def main():
         arg = parsed.arguments[arg_index]
         if parsing_paths and arg.startswith('@'):
             if len(paths_collected) == 0:
-                parser.error("expecting paths before {}".format(arg))
+                parser.error('expecting paths before {}'.format(arg))
             parsing_paths = False
         elif parsing_paths and not arg.startswith('@'):
             paths_collected.add(arg)
@@ -61,10 +61,10 @@ def main():
             tag_name_has_alphabet = False
             for ch in arg[1:]:
                 if ch not in TAG_NAME_CHARS:
-                    parser.error("bad char {} in tag name {}".format(ch, arg))
+                    parser.error('bad char {} in tag name {}'.format(ch, arg))
                 tag_name_has_alphabet |= ch.isalpha()
             if not tag_name_has_alphabet:
-                parser.error("no alphabets in tag name {}".format(arg))
+                parser.error('no alphabets in tag name {}'.format(arg))
             tags_collected.add(arg)
             arg_index += 1
         else:
@@ -72,7 +72,7 @@ def main():
             tags_collected, paths_collected = set(), set()
             parsing_paths = True
     if parsing_paths:
-        parser.error("expecting a tag name")
+        parser.error('expecting a tag name')
     updates.append((tags_collected, paths_collected))
 
     # Apply updates and message
@@ -91,4 +91,4 @@ def main():
                 messages.add(msg.format(tag, full_path))
     save_tags(tag_to_paths)
     if messages:
-        print("\n".join(messages))
+        print('\n'.join(messages))
