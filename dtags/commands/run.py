@@ -129,7 +129,10 @@ def main():
             index += 1
         else:
             break  # beginning of the command
-    command = ' '.join(parsed.arguments[index:])
+    command = ' '.join(
+        "'{}'".format(arg) if ' ' in arg else arg
+        for arg in parsed.arguments[index:]
+    )
     if not (targets and command):
         parser.error('too few arguments')
 
