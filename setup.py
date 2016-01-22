@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='dtags',
-    version='1.0.7',
+    version='1.0.8',
     description='Directory tags for lazy programmers',
     author='Joohwan Oh',
     author_email='joohwan.oh@outlook.com',
