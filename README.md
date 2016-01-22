@@ -28,7 +28,7 @@ ever having to `cd`. For example, tag the directories you visit frequently:
 > tag ~/vms/web ~/vms/db ~/vms/api @vms
 ```
 
-Then you can run commands like this:
+Then you can run commands like these:
 ```bash
 > run @project git status -sb
 > run @vms vagrant up
@@ -56,9 +56,9 @@ You can also use the `--edit` option to edit the configuration file directly.
 
 With the `--json` option you can export your dtags config in a flexible manner:
 ```bash
-> tags --json @only @the @ones @your @friend @needs > export_file
+> tags --json @only @the @ones @your @friend @needs > new_tags
 ```
-You can then place the export file in `~/.dtags` for any other users or hosts to reuse the tags!
+Place the content in `~/.dtags` to reuse the tags!
 
 To remove the tags you don't need anymore:
 ```bash

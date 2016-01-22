@@ -151,13 +151,13 @@ def main():
             child_exit_code = process.wait()
             tmp_file.seek(0)
             _print_header(tag, path)
-            print(tmp_file.read())
+            sys.stdout.write(tmp_file.read())
             tmp_file.close()
             if child_exit_code != 0:
                 exit_code = 1
             if parsed.exit_codes:
                 _print_exit_code(child_exit_code)
-            print('')
+            sys.stdout.write('\n')
     else:
         # Run the command sequentially
         for path, tag in targets.items():
@@ -172,5 +172,5 @@ def main():
                 exit_code = 1
             if parsed.exit_codes:
                 _print_exit_code(child_exit_code)
-            print('')
+            sys.stdout.write('\n')
     sys.exit(exit_code)
