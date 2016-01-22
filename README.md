@@ -1,81 +1,87 @@
-# DTags 
+# dtags 
 Directory tags for lazy programmers.
-Written in Python, inspired by [gr](https://github.com/mixu/gr).
+Inspired by [gr](https://github.com/mixu/gr).
 
-## Introduction
+#### Introduction
 
 Do you have too many git repositories or vagrant machines to manage? Does your 
-daily workflow require you to switch between different directories more often
-than you would like? Are you always searching for ways to type your keyboard 
-less? If your answered *yes* to any of these questions, then dtags may be for
-you!
+daily workflow require you to switch between directories more often than you 
+would like? Do you constantly look for ways to type less for more? If you 
+answered *yes* to any of these questions, then dtags may be for you!
 
-## Getting Started
+#### Getting Started
 
-Install using [pip](https://pip.pypa.io) (Python 2.7+ and 3.4+ supported):
-```python
-sudo pip install --upgrade pip setuptools
-sudo pip install --upgrade dtags
+Install using [pip](https://pip.pypa.io) (Python 2.7+ and 3.4+):
+```bash
+~$ sudo pip install --upgrade pip setuptools
+~$ sudo pip install --upgrade dtags
 ```
 
-Once installed, 4 commands will be available to you: 
+Once installed, you have 4 commands at your disposal: 
 `tags`, `tag`, `untag` and `run`.
 
-Tag any number of directories to run commands in them at the same time without 
-ever having to `cd`. For example, tag the directories you visit frequently:
+Tag the directories (tag names must begin with `@`):
 ```bash
-> tag ~/frontend ~/backend ~/tools ~/scripts @project
-> tag ~/vms/web ~/vms/db ~/vms/api @vms
+~$ tag /home/joowani/frontend @frontend
+~$ tag /home/joowani/backend @backend
+~$ tag ~/frontend ~/backend @work
+~$ tag ~/db @vm
+~$ tag ~/web @vm
+# Or equivalently
+~$ tag ~/frontend @frontend @work ~/backend @backend @work ~/db ~/web @vm
 ```
 
-Then you can run commands like these:
+You can then run commands in the tagged directories:
 ```bash
-> run @project git status -sb
-> run @vms vagrant up
-> run @frontend ls -la
+~$ run @project git fetch origin
+~$ run @frontend @backend git status -sb
+~$ run @vms vagrant up
 ```
 
-You can even run the commands in parallel:
+Directory paths can be used as well:
 ```bash
-> run -p @project git pull
-> run -p @vms vagrant up
-> run -p @backend 'sleep 5 && echo done'
+~$ run @backend ~/scripts ~/redis ls -la
 ```
 
-If you want an overview of all your tags, you can use the command `tags` to
-display them in a variety of ways:
+Run commands in parallel with `-p` and display exit codes with `-e`:
 ```bash
-> tags @backend @frontend   # filter by tags 
-> tags --json               # display the raw JSON
-> tags --expand             # expand home
-> tags --reverse            # show the reverse mapping
-```
-You can also use the `--edit` option to edit the configuration file directly.
-
-
-
-With the `--json` option you can export your dtags config in a flexible manner:
-```bash
-> tags --json @only @the @ones @your @friend @needs > new_tags
-```
-Place the content in `~/.dtags` to reuse the tags!
-
-To remove the tags you don't need anymore:
-```bash
-> untag ~/frontend ~/backend ~/tools ~/scripts @project ~/backend @backend
-> untag ~/vms/web ~/vms/db ~/vms/api @vms ~/has/many/tags @foo @bar
-> untag --all @backend   # removes the tag completely
-> untag --all ~/vms/web  # removes the path from all tags
+# When running things in parallel ensure your command doesn't wait for input!
+~$ run -p @backend 'sleep 5 && echo done'
+~$ run -p @project git pull
+~$ run -p @vms vagrant up
+~$ run -e @project ls folder
 ```
 
-If you need more help you can always use the `--help` option for any of the 
-above commands.
+Use the command `tags` to display or edit current tags:
+```bash
+~$ tags						 # display all tags defined
+~$ tags @backend @frontend   # display only the specified tags
+~$ tags --json               # display the raw JSON
+~$ tags --expand             # expand home (~)
+~$ tags --reverse            # show the reverse mapping
+~$ tags --edit               # edit the JSON directly using an editor
+```
+
+Export and reuse your tags with `tags --json`:
+```bash
+~$ tags --json @foo @bar | ssh user@host "cat > ~/.dtags"
+```
+
+Remove the tags you don't need anymore:
+```bash
+~$ untag ~/frontend @frontend ~/backend @backend
+~$ untag /vagrant/web /vagrant/db @vms
+~$ untag --all @backend   # removes the tag completely
+~$ untag --all ~/vms/web  # removes the directory path from all tags
+```
+
+Last but not least, use the `--help` option to find out more!
 
 
-## Auto-completion
+#### Auto-completion
 
 Auto-completion for **zsh** and **bash** are supported. I *strongly* recommend 
-you to enable it (so you don't have to type the `@` symbol all the time).
+you to enable it (so you won't have to type the `@` symbol all the time).
 
 If you use **bash**, place the following lines in your **~/.bashrc** 
 (or **~/.bash_profile** for OS X):
@@ -95,3 +101,10 @@ if command -v register-python-argcomplete > /dev/null 2>&1; then
     eval "$(register-python-argcomplete tags)"
 fi
 ```
+
+#### To Do
+
+* Warn the user when commands that are known to wait are run with `-p`
+* Allow the user to customize the message header style & color
+* Add options to `run` command for suppressing stdout and headers
+* Add tests
