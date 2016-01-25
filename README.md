@@ -104,7 +104,7 @@ if command -v register-python-argcomplete > /dev/null 2>&1; then
 fi
 ```
 
-For zsh, place the following lines pr something similar in your **~/.zshrc**: 
+For zsh, place the following lines or something similar in your **~/.zshrc**: 
 ```bash                                                                                  
 autoload bashcompinit                                                           
 bashcompinit 
