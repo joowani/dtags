@@ -9,7 +9,7 @@ daily tasks require you to switch between the same directories over and over?
 Are you lazy programmer who's always looking for shortcuts? If you answered
 *yes* to any of these questions, then dtags may be for you!
 
-#### Getting Started
+#### Installation
 
 Install using [pip](https://pip.pypa.io) (Python 2.7+ and 3.4+):
 ```bash
@@ -20,6 +20,8 @@ Install using [pip](https://pip.pypa.io) (Python 2.7+ and 3.4+):
 Once installed, you will have 4 commands at your disposal: 
 `tags`, `tag`, `untag` and `run`.
 
+#### Usage Examples
+
 Tag directories using `tag`:
 ```bash
 ~$ tag ~/frontend @frontend
@@ -28,7 +30,7 @@ Tag directories using `tag`:
 ~$ tag ~/db @vm
 ~$ tag ~/web @vm
 
-# Or equivalently:
+# Or equivalently
 ~$ tag ~/frontend @frontend @work ~/backend @backend @work ~/db ~/web @vm
 
 # All tag names must begin with the @ symbol
