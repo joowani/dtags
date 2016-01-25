@@ -4,10 +4,10 @@ Inspired by [gr](https://github.com/mixu/gr).
 
 #### Introduction
 
-Do you have too many git repositories or vagrant machines to manage? Does your 
-daily workflow require you to switch between directories more often than you 
-would like? Do you constantly look for ways to type less for more? If you 
-answered *yes* to any of these questions, then dtags may be for you!
+Do you have too many git repositories or vagrant machines to manage? Do your 
+daily tasks require you to switch between the same directories over and over? 
+Are you lazy programmer who's always looking for shortcuts? If you answered
+*yes* to any of these questions, then dtags may be for you!
 
 #### Getting Started
 
@@ -17,10 +17,10 @@ Install using [pip](https://pip.pypa.io) (Python 2.7+ and 3.4+):
 ~$ sudo pip install --upgrade dtags
 ```
 
-Once installed, you have 4 commands at your disposal: 
+Once installed, you will have 4 commands at your disposal: 
 `tags`, `tag`, `untag` and `run`.
 
-Tag the directories (tag names must begin with `@`):
+Tag directories (tag names must begin with the `@` symbol):
 ```bash
 ~$ tag /home/joowani/frontend @frontend
 ~$ tag /home/joowani/backend @backend
@@ -31,28 +31,27 @@ Tag the directories (tag names must begin with `@`):
 ~$ tag ~/frontend @frontend @work ~/backend @backend @work ~/db ~/web @vm
 ```
 
-You can then run commands in the tagged directories:
+Execute commands in the tagged directories using `run`:
 ```bash
 ~$ run @project git fetch origin
 ~$ run @frontend @backend git status -sb
 ~$ run @vms vagrant up
 ```
 
-Directory paths can be used as well:
+Directory paths can be specified directly as well:
 ```bash
 ~$ run @backend ~/scripts ~/redis ls -la
 ```
 
-Run commands in parallel with `-p` and display exit codes with `-e`:
+Run commands in parallel using `run -p`:
 ```bash
 # When running things in parallel ensure your command doesn't wait for input!
 ~$ run -p @backend 'sleep 5 && echo done'
 ~$ run -p @project git pull
 ~$ run -p @vms vagrant up
-~$ run -e @project ls folder
 ```
 
-Use the command `tags` to display or edit current tags:
+Display/edit tags using `tags`:
 ```bash
 ~$ tags						 # display all tags defined
 ~$ tags @backend @frontend   # display only the specified tags
@@ -62,12 +61,12 @@ Use the command `tags` to display or edit current tags:
 ~$ tags --edit               # edit the JSON directly using an editor
 ```
 
-Export and reuse your tags with `tags --json`:
+Export tags using `tags --json`:
 ```bash
 ~$ tags --json @foo @bar | ssh user@host "cat > ~/.dtags"
 ```
 
-Remove the tags you don't need anymore:
+Disassociate tags and directory paths using `untag`:
 ```bash
 ~$ untag ~/frontend @frontend ~/backend @backend
 ~$ untag /vagrant/web /vagrant/db @vms
@@ -75,16 +74,16 @@ Remove the tags you don't need anymore:
 ~$ untag --all ~/vms/web  # removes the directory path from all tags
 ```
 
-Last but not least, use the `--help` option to find out more!
+You can always use the `--help` option to find out more!
 
 
 #### Auto-completion
 
-Auto-completion for **zsh** and **bash** are supported. I *strongly* recommend 
-you to enable it (so you won't have to type the `@` symbol all the time).
+Auto-completion for **zsh** and **bash** are supported. I recommend you to 
+enable it so you won't have to type the `@` symbol all the time.
 
-If you use **bash**, place the following lines in your **~/.bashrc** 
-(or **~/.bash_profile** for OS X):
+For bash, place the following lines or something similar in your 
+**~/.bashrc** (**~/.bash_profile** for OS X):
 ```bash
 if command -v register-python-argcomplete > /dev/null 2>&1; then
     eval "$(register-python-argcomplete run)"                                                                                                        
@@ -92,7 +91,7 @@ if command -v register-python-argcomplete > /dev/null 2>&1; then
 fi
 ```
 
-If you use **zsh**, place the following lines in your **~/.zshrc**: 
+For zsh, place the following lines pr something similar in your **~/.zshrc**: 
 ```bash                                                                                  
 autoload bashcompinit                                                           
 bashcompinit 
@@ -104,7 +103,7 @@ fi
 
 #### To Do
 
-* Warn the user when commands that are known to wait are run with `-p`
-* Allow the user to customize the message header style & color
+* Warn the user when commands known to hang are executed with `run -p`
+* Allow the user to customize the message header style and color
 * Add options to `run` command for suppressing stdout and headers
 * Add tests
