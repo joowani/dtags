@@ -110,6 +110,7 @@ fi
 
 #### To Do
 
+* Add support for Windows
 * Warn the user when commands known to hang are executed with `run -p`
 * Allow the user to customize the message header style and color
 * Add options to `run` command for suppressing stdout and headers
