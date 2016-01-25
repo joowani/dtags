@@ -6,7 +6,7 @@ Inspired by [gr](https://github.com/mixu/gr).
 
 Do you have too many git repositories or vagrant machines to manage? Do your 
 daily tasks require you to switch between the same directories over and over? 
-Are you lazy programmer who's always looking for shortcuts? If you answered
+Are you a lazy programmer who's always looking for shortcuts? If you answered
 *yes* to any of these questions, then dtags may be for you!
 
 #### Installation
@@ -111,7 +111,8 @@ fi
 #### To Do
 
 * Add support for Windows
+* Improve the configuration to include things other than just tags
 * Warn the user when commands known to hang are executed with `run -p`
-* Allow the user to customize the message header style and color
-* Add options to `run` command for suppressing stdout and headers
+* Allow the user to customize the style and the color of the headers
+* Add options to the `run` command for suppressing stdout and headers
 * Add tests
