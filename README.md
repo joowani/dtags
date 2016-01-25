@@ -20,32 +20,35 @@ Install using [pip](https://pip.pypa.io) (Python 2.7+ and 3.4+):
 Once installed, you will have 4 commands at your disposal: 
 `tags`, `tag`, `untag` and `run`.
 
-Tag directories (tag names must begin with the `@` symbol):
+Tag directories using `tag`:
 ```bash
-~$ tag /home/joowani/frontend @frontend
-~$ tag /home/joowani/backend @backend
+~$ tag ~/frontend @frontend
+~$ tag ~/backend @backend
 ~$ tag ~/frontend ~/backend @work
 ~$ tag ~/db @vm
 ~$ tag ~/web @vm
-# Or equivalently
+
+# Or equivalently:
 ~$ tag ~/frontend @frontend @work ~/backend @backend @work ~/db ~/web @vm
+
+# All tag names must begin with the @ symbol
 ```
 
 Execute commands in the tagged directories using `run`:
 ```bash
+# Execute 'git fetch origin' in all directories tagged @project
 ~$ run @project git fetch origin
+
+# Execute 'git status -sb' in all directories tagged @frontend and @backend
 ~$ run @frontend @backend git status -sb
-~$ run @vms vagrant up
-```
 
-Directory paths can be specified directly as well:
-```bash
+# Execute 'vagrant status' in all directories tagged @vms
+~$ run @vms vagrant status
+
+# Directory paths can be specified along with tags
 ~$ run @backend ~/scripts ~/redis ls -la
-```
 
-Run commands in parallel using `run -p`:
-```bash
-# When running things in parallel ensure your command doesn't wait for input!
+# The commands can be executed in parallel as long as it doesn't wait for input!
 ~$ run -p @backend 'sleep 5 && echo done'
 ~$ run -p @project git pull
 ~$ run -p @vms vagrant up
@@ -61,17 +64,20 @@ Display/edit tags using `tags`:
 ~$ tags --edit               # edit the JSON directly using an editor
 ```
 
-Export tags using `tags --json`:
-```bash
-~$ tags --json @foo @bar | ssh user@host "cat > ~/.dtags"
-```
-
 Disassociate tags and directory paths using `untag`:
 ```bash
+
+# Remove tags @frontend and @backend from directories ~/frontend and ~/backend respectively
 ~$ untag ~/frontend @frontend ~/backend @backend
+
+# Remove tags @vms from directories /vagrant/web and /vagrant/db
 ~$ untag /vagrant/web /vagrant/db @vms
-~$ untag --all @backend   # removes the tag completely
-~$ untag --all ~/vms/web  # removes the directory path from all tags
+
+# Remove tag @backend completely
+~$ untag --all @backend
+
+# Remove the directory path ~/vms/web from all tags
+~$ untag --all ~/vms/web 
 ```
 
 You can always use the `--help` option to find out more!
@@ -80,7 +86,7 @@ You can always use the `--help` option to find out more!
 #### Auto-completion
 
 Auto-completion for **zsh** and **bash** are supported. I recommend you to 
-enable it so you won't have to type the `@` symbol all the time.
+enable it if possible so you won't have to type the `@` symbol all the time.
 
 For bash, place the following lines or something similar in your 
 **~/.bashrc** (**~/.bash_profile** for OS X):
