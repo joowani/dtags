@@ -27,7 +27,7 @@ To get the latest commits:
 Once installed, you will have 4 commands at your disposal: 
 `tag`, `run`, `tags` and `untag`. 
 
-#### Usage Examples
+#### Usage
 
 Tag directories using `tag`:
 ```bash
@@ -75,7 +75,7 @@ Display/edit tags using `tags`:
 
 Disassociate tags and directory paths using `untag`:
 ```bash
-# Remove tags @frontend and @backend from directories ~/frontend and ~/backend respectively
+# Remove tags @frontend and @backend from ~/frontend and ~/backend respectively
 ~$ untag ~/frontend @frontend ~/backend @backend
 
 # Remove tags @vms from directories /vagrant/web and /vagrant/db
