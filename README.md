@@ -18,7 +18,7 @@ Install using [pip](https://pip.pypa.io) (Python 2.7+ and 3.4+):
 ```
 
 Once installed, you will have 4 commands at your disposal: 
-`tags`, `tag`, `untag` and `run`.
+`tag`, `run`, `tags` and `untag`. 
 
 #### Usage Examples
 
@@ -68,7 +68,6 @@ Display/edit tags using `tags`:
 
 Disassociate tags and directory paths using `untag`:
 ```bash
-
 # Remove tags @frontend and @backend from directories ~/frontend and ~/backend respectively
 ~$ untag ~/frontend @frontend ~/backend @backend
 
