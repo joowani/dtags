@@ -17,6 +17,13 @@ Install using [pip](https://pip.pypa.io) (Python 2.7+ and 3.4+):
 ~$ sudo pip install --upgrade dtags
 ```
 
+To get the latest commits:
+```bash
+~$ git clone https://github.com/joowani/dtags.git
+~$ cd dtags
+~$ sudo python setup.py install
+```
+
 Once installed, you will have 4 commands at your disposal: 
 `tag`, `run`, `tags` and `untag`. 
 
