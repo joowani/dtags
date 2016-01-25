@@ -57,7 +57,7 @@ Execute commands in the tagged directories using `run`:
 # Directory paths can be specified along with tags
 ~$ run @backend ~/scripts ~/redis ls -la
 
-# The commands can be executed in parallel as long as it doesn't wait for input!
+# The command can be executed in parallel as long as it doesn't wait for input
 ~$ run -p @backend 'sleep 5 && echo done'
 ~$ run -p @project git pull
 ~$ run -p @vms vagrant up
@@ -81,7 +81,7 @@ Disassociate tags and directory paths using `untag`:
 # Remove tags @vms from directories /vagrant/web and /vagrant/db
 ~$ untag /vagrant/web /vagrant/db @vms
 
-# Remove tag @backend completely
+# Remove the tag @backend completely
 ~$ untag --all @backend
 
 # Remove the directory path ~/vms/web from all tags
@@ -89,7 +89,6 @@ Disassociate tags and directory paths using `untag`:
 ```
 
 You can always use the `--help` option to find out more!
-
 
 #### Auto-completion
 
