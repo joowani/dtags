@@ -10,15 +10,16 @@ import tempfile
 import subprocess
 from collections import OrderedDict
 
-from dtags.colors import *
+from dtags.colors import RED, PINK, CYAN, YELLOW, CLEAR
 from dtags.completion import ChoicesCompleter, autocomplete
 from dtags.config import load_tags
 from dtags.help import HelpFormatter
 from dtags.utils import expand_path
 
+shell = os.getenv('SHELL')
 tmp_file = None
-process = None
-processes = []
+current_process = None
+child_processes = []
 cmd_description = """
 dtags - run commands in directories
 
@@ -32,57 +33,52 @@ e.g. the command {y}run @a @b ~/foo ~/bar ls -la{x}:
 """.format(p=PINK, c=CYAN, y=YELLOW, x=CLEAR)
 
 
-def _print_header(tag, path):
-    """Print the run information header."""
-    tail = ' ({}{}{}):'.format(PINK, tag, CLEAR) if tag else ':'
-    print('{}{}{}{}'.format(CYAN, path, tail, CLEAR))
+def contains_ctrl_error_msg(line):
+    """Helper function for filtering out bash ioctl error messages."""
+    if 'no job control in this shell' in line:
+        return True
+    if 'Inappropriate ioctl for device' in line:
+        return True
 
 
-def _print_error(cmd, err):
-    """Print the error message."""
-    print('Failed to run {}{}{}: {}'.format(YELLOW, cmd, CLEAR, err))
-
-
-def _print_exit_code(exit_code):
-    """Print the exit code from process."""
-    print('{}Exit Code: {}{}'.format(RED, exit_code, CLEAR))
-
-
-def _send_sigterm(target_process):
+def send_sigterm(child_process):
     """Send sigterm to the target child process."""
     try:
-        os.killpg(os.getpgid(target_process.pid), signal.SIGKILL)
+        os.killpg(os.getpgid(child_process.pid), signal.SIGKILL)
     except OSError as err:
-        # If the process is already killed for some reason, do nothing
         if err.errno != errno.ESRCH:
             raise
+        # If the process is already killed for some reason, do nothing
 
 
-def _cleanup_resources():
-    """Kill child processes and remove temporary files."""
-    global tmp_file, process, processes
-    if tmp_file is not None:
-        tmp_file.close()
-    if process is not None:
-        _send_sigterm(process)
-    for _, _, proc, tmp in processes:
-        _send_sigterm(proc)
-        tmp.close()
-
-
-def _kill_signal_handler(signum, frame):
+def kill_signal_handler(signum, frame):
     """Clean up resources when sigterm or sigint is received."""
-    _cleanup_resources()
+    cleanup_resources()
     sys.exit(127 + signum)
 
 
+def cleanup_resources():
+    """Kill child processes and remove temporary files."""
+    global tmp_file, current_process, child_processes
+    if tmp_file is not None:
+        tmp_file.close()
+    if current_process is not None:
+        send_sigterm(current_process)
+    for _, _, proc, tmp in child_processes:
+        send_sigterm(proc)
+        tmp.close()
+
+
 def main():
-    global tmp_file, process, processes
+    global tmp_file, current_process, child_processes
+
+    # https://stackoverflow.com/questions/25099895/
+    signal.signal(signal.SIGTTOU, signal.SIG_IGN)
 
     # Ensure that child processes are cleaned up
-    signal.signal(signal.SIGINT, _kill_signal_handler)
-    signal.signal(signal.SIGTERM, _kill_signal_handler)
-    atexit.register(_cleanup_resources)
+    signal.signal(signal.SIGINT, kill_signal_handler)
+    signal.signal(signal.SIGTERM, kill_signal_handler)
+    atexit.register(cleanup_resources)
 
     tag_to_paths = load_tags()
     parser = argparse.ArgumentParser(
@@ -93,12 +89,12 @@ def main():
     )
     parser.add_argument(
         '-p', '--parallel',
-        help='run the commands in parallel',
+        help='run the command in parallel',
         action='store_true'
     )
     parser.add_argument(
         '-e', '--exit-codes',
-        help='display exit codes',
+        help='display the exit codes',
         action='store_true'
     )
     parser.add_argument(
@@ -129,51 +125,79 @@ def main():
             index += 1
         else:
             break  # beginning of the command
-    command = ' '.join(
-        "'{}'".format(arg) if ' ' in arg else arg
-        for arg in parsed.arguments[index:]
-    )
+
+    # Join the command arguments into a string
+    command_arguments = parsed.arguments[index:]
+    if len(command_arguments) == 0:
+        command = None
+    elif len(command_arguments) == 1:
+        command = ' '.join(command_arguments)
+    else:
+        command = ' '.join(
+            "'{}'".format(arg) if ' ' in arg else arg
+            for arg in command_arguments
+        )
     if not (targets and command):
         parser.error('too few arguments')
 
-    exit_code = 0
     if parsed.parallel:
         # Run the command in parallel
         for path, tag in targets.items():
             tmp_file = tempfile.TemporaryFile(mode='w+t')
-            process = subprocess.Popen(
-                command,
+            current_process = subprocess.Popen(
+                '{} -i -c "{}"'.format(shell, command),
                 cwd=path,
+                shell=True,
                 stdout=tmp_file,
                 stderr=tmp_file,
-                shell=True,
-                preexec_fn=os.setsid
+                preexec_fn=os.setsid,
             )
-            processes.append((path, tag, process, tmp_file))
-        for path, tag, process, tmp_file in processes:
-            child_exit_code = process.wait()
+            child_processes.append((path, tag, current_process, tmp_file))
+        for path, tag, current_process, tmp_file in child_processes:
+            exit_code = current_process.wait()
+            tail = ' ({}{}{})'.format(PINK, tag, CLEAR) if tag else ':'
+            print('{}>>> {}{}{}{}'.format(
+                YELLOW, CYAN, path, tail, CLEAR
+            ))
             tmp_file.seek(0)
-            _print_header(tag, path)
-            sys.stdout.write(tmp_file.read())
+            lines = tmp_file.readlines()
+            offset = 0
+            if len(lines) > 0 and contains_ctrl_error_msg(lines[0]):
+                offset += 1
+            if len(lines) > 1 and contains_ctrl_error_msg(lines[1]):
+                offset += 1
+            sys.stdout.write(''.join(lines[offset:]))
             tmp_file.close()
-            if child_exit_code != 0:
-                exit_code = 1
             if parsed.exit_codes:
-                _print_exit_code(child_exit_code)
+                print('{}>>> {}exit code: {}{}'.format(
+                    YELLOW, RED, exit_code, CLEAR
+                ))
             sys.stdout.write('\n')
     else:
         # Run the command sequentially
+        full_command = []
         for path, tag in targets.items():
-            _print_header(tag, path)
-            child_exit_code = subprocess.call(
-                command,
-                cwd=path,
-                shell=True,
-                stderr=sys.stdout.fileno()
-            )
-            if child_exit_code != 0:
-                exit_code = 1
+            tag_info = ' ({}{}{})'.format(PINK, tag, CLEAR) if tag else ':'
             if parsed.exit_codes:
-                _print_exit_code(child_exit_code)
-            sys.stdout.write('\n')
-    sys.exit(exit_code)
+                tail = 'printf "{}>>> {}exit code: $?{}\n\n"'.format(
+                    YELLOW, RED, CLEAR
+                )
+            else:
+                tail = 'printf "\n"'
+            full_command.append(
+                '(printf "{header}"; cd {path} && {cmd};{tail})'.format(
+                    header='{}>>> {}{}{}{}\n'.format(
+                        YELLOW, CYAN, path, CLEAR, tag_info
+                    ),
+                    path=path,
+                    cmd=command,
+                    tail=tail
+                )
+            )
+        subprocess.call(
+            [shell, '-i', '-c', '{}'.format(';'.join(full_command))],
+            stderr=sys.stdout.fileno()
+        )
+        # https://stackoverflow.com/questions/25099895/
+        os.tcsetpgrp(0, os.getpgrp())
+    sys.exit(0)

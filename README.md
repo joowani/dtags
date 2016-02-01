@@ -4,14 +4,14 @@ Inspired by [gr](https://github.com/mixu/gr).
 
 #### Introduction
 
-Do you have too many git repositories or vagrant machines to manage? Do your 
-daily tasks require you to switch between the same directories over and over? 
-Are you a lazy programmer who's always looking for shortcuts? If you answered
-*yes* to any of these questions, then dtags may be for you!
+Do you have too many git repositories or vagrant machines to manage? Does your 
+daily routine require you to switch between the same directories over and over? 
+Are you a lazy programmer who is always looking for shortcuts? If you answered
+*yes* to any of these questions, then **dtags** may be for you!
 
 #### Installation
 
-Install using [pip](https://pip.pypa.io) (Python 2.7+ and 3.4+):
+Install using [pip](https://pip.pypa.io) (Python 2.7+ and 3.4+ supported):
 ```bash
 ~$ sudo pip install --upgrade pip setuptools
 ~$ sudo pip install --upgrade dtags
@@ -40,7 +40,7 @@ Tag directories using `tag`:
 # Or equivalently
 ~$ tag ~/frontend @frontend @work ~/backend @backend @work ~/db ~/web @vm
 
-# All tag names must begin with the @ symbol
+# Note: All tag names must begin with the '@' symbol
 ```
 
 Execute commands in the tagged directories using `run`:
@@ -57,15 +57,21 @@ Execute commands in the tagged directories using `run`:
 # Directory paths can be specified along with tags
 ~$ run @backend ~/scripts ~/redis ls -la
 
-# The command can be executed in parallel as long as it doesn't wait for input
+# The command can be executed in parallel if it doesn't wait on input
 ~$ run -p @backend 'sleep 5 && echo done'
 ~$ run -p @project git pull
 ~$ run -p @vms vagrant up
+
+# Display the exit code for each execution
+~$ run -e @backend ls foobar
+
+# Commands are executed through interactive shells so you can use your aliases!
+~$ run @project myalias
 ```
 
 Display/edit tags using `tags`:
 ```bash
-~$ tags						 # display all tags defined
+~$ tags						 # display all tags
 ~$ tags @backend @frontend   # display only the specified tags
 ~$ tags --json               # display the raw JSON
 ~$ tags --expand             # expand home (~)
@@ -93,9 +99,9 @@ You can always use the `--help` option to find out more!
 #### Auto-completion
 
 Auto-completion for **zsh** and **bash** are supported. I recommend you to 
-enable it if possible so you won't have to type the `@` symbol all the time.
+enable it so you won't have to type the `@` symbol all the time.
 
-For bash, place the following lines or something similar in your 
+For bash, place the following lines (or something similar) in your 
 **~/.bashrc** (**~/.bash_profile** for OS X):
 ```bash
 if command -v register-python-argcomplete > /dev/null 2>&1; then
@@ -104,7 +110,7 @@ if command -v register-python-argcomplete > /dev/null 2>&1; then
 fi
 ```
 
-For zsh, place the following lines or something similar in your **~/.zshrc**: 
+For zsh, place the following lines (or something similar) in your **~/.zshrc**: 
 ```bash                                                                                  
 autoload bashcompinit                                                           
 bashcompinit 
@@ -114,11 +120,16 @@ if command -v register-python-argcomplete > /dev/null 2>&1; then
 fi
 ```
 
+#### Notes
+
+* dtags is not supported on Windows
+* `run -p` will probably hang on interactive commands that wait on input
+* `run -p` may use up a lot of memory on commands that produce large output
+* `run -p` sends *sigterm* to its child processes when interrupted.
+
 #### To Do
 
-* Add support for Windows
+* Extension support
 * Improve the configuration to include things other than just tags
 * Warn the user when commands known to hang are executed with `run -p`
-* Allow the user to customize the style and the color of the headers
-* Add options to the `run` command for suppressing stdout and headers
-* Add tests
+* Add integration tests
