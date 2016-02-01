@@ -62,7 +62,7 @@ Execute commands in the tagged directories using `run`:
 ~$ run -p @project git pull
 ~$ run -p @vms vagrant up
 
-# Display exit codes for each execution
+# Display the exit code for each execution
 ~$ run -e @backend ls foobar
 
 # Commands are executed through interactive shells so you can use your aliases!
