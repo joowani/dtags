@@ -30,11 +30,6 @@ e.g. the command {y}tags @a @b ~/foo ~/bar @c{x}:
 
 def main():
     tag_to_paths = load_tags()
-    path_to_tags = defaultdict(set)
-    for tag, paths in tag_to_paths.items():
-        for path in paths.keys():
-            path_to_tags[path].add(tag)
-
     parser = ArgumentParser(
         prog='tags',
         description=cmd_description,
@@ -110,6 +105,10 @@ def main():
         else:
             filtered = {t: ps.values() for t, ps in tag_to_paths.items()}
     else:
+        path_to_tags = defaultdict(set)
+        for tag, paths in tag_to_paths.items():
+            for path in paths.keys():
+                path_to_tags[path].add(tag)
         filtered = {}
         for term in parsed.search_terms:
             if term in tag_to_paths:
@@ -141,3 +140,6 @@ def main():
         for tag, paths in sorted(filtered.items()):
             print('{}{}{}'.format(PINK, tag, CLEAR))
             print('{}{}{}\n'.format(CYAN, '\n'.join(sorted(paths)), CLEAR))
+
+if __name__ == '__main__':
+    main()

@@ -201,3 +201,6 @@ def main():
         # https://stackoverflow.com/questions/25099895/
         os.tcsetpgrp(0, os.getpgrp())
     sys.exit(0)
+
+if __name__ == '__main__':
+    main()

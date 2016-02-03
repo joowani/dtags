@@ -92,3 +92,6 @@ def main():
     save_tags(tag_to_paths)
     if messages:
         print('\n'.join(messages))
+
+if __name__ == '__main__':
+    main()
