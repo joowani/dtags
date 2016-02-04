@@ -33,6 +33,7 @@ e.g. the command {y}run @a @b ~/foo ~/bar ls -la{x}:
 """.format(p=PINK, c=CYAN, y=YELLOW, x=CLEAR)
 
 
+# TODO need this get rid of this hack one day
 def contains_ctrl_error_msg(line):
     """Helper function for filtering out bash ioctl error messages."""
     if 'no job control in this shell' in line:
@@ -84,7 +85,7 @@ def main():
     parser = argparse.ArgumentParser(
         prog='run',
         description=cmd_description,
-        usage='run [options] [targets] command',
+        usage='run [<options>] [<targets>] <command>',
         formatter_class=HelpFormatter
     )
     parser.add_argument(
@@ -101,8 +102,8 @@ def main():
         'arguments',
         type=str,
         nargs=argparse.REMAINDER,
-        metavar='[targets]',
-        help='tags or paths to run the command for'
+        metavar='[<targets>]',
+        help='directory paths or tag names'
     ).completer = ChoicesCompleter(tag_to_paths.keys())
     autocomplete(parser)
     parsed = parser.parse_args()

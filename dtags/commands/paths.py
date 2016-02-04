@@ -14,24 +14,43 @@ def main():
     tag_to_paths = load_tags()
     parser = ArgumentParser(
         prog='paths',
-        description='dtags - display the directory paths',
-        usage='paths tag',
-        formatter_class=HelpFormatter,
-        add_help=False
+        description='dtags - display the associated directory paths',
+        usage='paths <tag>',
+        formatter_class=HelpFormatter
     )
     parser.add_argument(
         'tag',
+        metavar='<tag>',
         type=str,
-        help='the name of the tag'
+        help='the directory tag name'
     ).completer = ChoicesCompleter(tag_to_paths.keys())
     autocomplete(parser)
     tag = parser.parse_args().tag
 
-    if tag not in tag_to_paths:
+    paths = list(tag_to_paths.get(tag, {}))
+    if not paths:
         halt('Tag not defined')
         sys.exit(errno.EINVAL)
-    for path in tag_to_paths[tag].keys():
-        print(path)
+
+    if len(paths) == 1:
+        print(paths[0])
+    else:
+        selection = [
+            '{}: {}'.format(index, path)
+            for index, path in enumerate(paths)
+        ]
+        selection.append('\nSelect directory (0 - {}): '.format(len(paths)))
+        try:
+            index = input('\n'.join(selection))
+        except KeyboardInterrupt:
+            sys.exit(1)
+        if not index.isdigit():
+            halt('Invalid input')
+        index = int(index)
+        if not (0 <= index < len(paths)):
+            halt('Index out of range')
+        print(paths[index])
+
 
 if __name__ == '__main__':
     main()

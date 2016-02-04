@@ -26,13 +26,13 @@ def main():
     tag_to_paths = load_tags()
     parser = argparse.ArgumentParser(
         prog="untag",
-        usage="untag [options] [[paths] [tags]...]",
+        usage="untag [<options>] [[<paths>] [<tags>]...]",
         description=cmd_description,
         formatter_class=HelpFormatter
     )
     parser.add_argument(
         '-a', '--all',
-        help='untag all tags or paths',
+        help='untag all directory tags or paths',
         action='store_true'
     )
     parser.add_argument(
