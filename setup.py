@@ -16,6 +16,7 @@ setup(
             'tag = dtags.commands.tag:main',
             'tags = dtags.commands.tags:main',
             'untag = dtags.commands.untag:main',
+            'paths = dtags.commands.paths:main'
         ],
     },
 )

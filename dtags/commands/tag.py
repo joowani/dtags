@@ -27,7 +27,7 @@ def main():
     tag_to_paths = load_tags()
     parser = ArgumentParser(
         prog='tag',
-        usage='tag [[paths] [tags]...]',
+        usage='tag [[<paths>] [<tags>]...]',
         description=cmd_description,
         formatter_class=HelpFormatter
     )
@@ -35,7 +35,7 @@ def main():
         'arguments',
         type=str,
         nargs='+',
-        metavar='[paths] [tags]',
+        metavar='[<paths>] [<tags>]',
         help='directory paths and tag names'
     )
     parsed = parser.parse_args()

@@ -33,7 +33,7 @@ def main():
     parser = ArgumentParser(
         prog='tags',
         description=cmd_description,
-        usage='tags [options] [paths] [tags]',
+        usage='tags [<options>] [<paths>] [<tags>]',
         formatter_class=HelpFormatter
     )
     parser.add_argument(
@@ -60,8 +60,8 @@ def main():
         'search_terms',
         type=str,
         nargs='*',
-        metavar='[paths] [tags]',
-        help='tag and directory paths to filter by'
+        metavar='[<paths>] [<tags>]',
+        help='directory paths and tag names to display'
     ).completer = ChoicesCompleter(tag_to_paths.keys())
     autocomplete(parser)
     parsed = parser.parse_args()
