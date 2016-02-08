@@ -1,103 +1,101 @@
-from __future__ import print_function
+"""DTags utility functions."""
 
 import os
 import sys
 import errno
-import importlib
-from sys import stderr
-
-from collections import Mapping
-# Importing this way for python 2 and 3 compatibility
-try:
-    urllib = importlib.import_module('urllib.parse')
-except ImportError:
-    urllib = importlib.import_module('urllib')
-try:
-    builtins = importlib.import_module('__builtin__')
-except ImportError:
-    builtins = importlib.import_module('builtins')
+import shutil
 
 
-def is_str(obj):
-    """Check if the object is a str or a unicode
+def info(message):
+    """Print the message to stdout.
 
-    :param obj: object to check
-    :return: True if str or unicode, else False
+    :param message: info message
+    :type message: str
     """
-    base_str = getattr(builtins, 'basestring', None)
-    return isinstance(obj, base_str) if base_str else isinstance(obj, str)
-
-
-def is_list(obj):
-    """Check if the object is an iterable
-
-    :param obj: object to check
-    :return: True if iterable, else False
-    """
-    return type(obj) == list
-
-
-def is_dict(obj):
-    """Check if the object is a mapping
-
-    :param obj: object to check
-    :return: True if mapping, else False
-    """
-    return isinstance(obj, Mapping)
+    sys.stdout.write('dtags: {}\n'.format(message))
 
 
 def halt(message, exit_code=errno.EPERM):
     """Print the message to stderr and exit with the exit code.
 
     :param message: error message
+    :type message: str
     :param exit_code: linux exit code
+    :type exit_code: int
     """
-    print(message, file=stderr)
+    sys.stderr.write('dtags: error: {}\n'.format(message))
     sys.exit(exit_code)
 
 
 def expand_path(path):
     """Fully expand a directory path.
 
-    :param path: a valid directory path
+    :param path: the directory path to expand
+    :type path: str
     :return: expanded path
+    :rtype: str
     """
     return os.path.realpath(os.path.expanduser(path))
 
 
-def shrink_path(path):
-    """Shrink the 'home' portion of the path to '~'.
+def collapse_path(path):
+    """Abbreviate the 'home' portion of the path to '~'.
 
-    :param path: a valid directory path
-    :return: shortened path
+    :param path: the directory path to shorten
+    :returns: the shortened path
     """
     path = expand_path(path)
     home = expand_path('~')
     return path.replace(home, '~') if path.startswith(home) else path
 
 
-def msgify(exception):
-    """Format the exception message.
+def is_dir(path):
+    """Check whether or not the path is a directory.
 
-    1. Convert any capital characters to lowercase
-    2. Strip any periods or newlines
-
-    :param exception: the exception whose message to msgify
-    :return: msgified string
+    :param path: the path to check
+    :type path: str
+    :returns: True if the path is a directory else False
+    :rtype: bool
     """
-    string = str(exception)
-    string = string if len(string) == 0 else string[0].lower() + string[1:]
-    return string.strip('.')
+    return os.path.isdir(expand_path(path))
 
 
-def safe_remove(path):
-    """Remove a file safely.
+def is_file(path):
+    """Check whether or not the path is a file.
 
-    If the file does not exist, then do nothing.
-
-    :param path: path of the file to remove
+    :param path: the path to check
+    :type path: str
+    :returns: True if the path is a file else False
+    :rtype: bool
     """
-    try:
-        os.remove(path)
-    except OSError:
-        pass
+    return os.path.isfile(expand_path(path))
+
+
+def rm_file(path):
+    """Remove the file from disk.
+
+    :param path: the path of the file to remove
+    :type path: str
+    """
+    if is_dir(path):
+        shutil.rmtree(path, ignore_errors=True)
+    elif is_file(path):
+        try:
+            os.remove(path)
+        except OSError as err:
+            if err.errno != errno.ENOENT:
+                raise err
+
+
+def msgify(msg):
+    """Sanitize the error message.
+
+    Convert the first character of the message to lowercase and remove all
+    periods.
+
+    :param msg: the message the sanitize
+    :type msg: str
+    :returns: the sanitized message
+    :rtype: str
+    """
+    return (msg[0].lower() + msg[1:]).rsplit('.')[0] if msg else ''

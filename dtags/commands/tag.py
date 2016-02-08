@@ -1,33 +1,29 @@
-#!/usr/bin/env python
+import argparse
 
-import os
-from argparse import ArgumentParser
-
+from dtags.chars import ALLOWED_CHARS
+from dtags.colors import PINK, CYAN, YELLOW, END
+from dtags.config import load_mapping, save_mapping
 from dtags.help import HelpFormatter
-from dtags.colors import PINK, CYAN, YELLOW, CLEAR
-from dtags.chars import TAG_NAME_CHARS
-from dtags.config import load_tags, save_tags
-from dtags.utils import expand_path, shrink_path
+from dtags.utils import collapse_path, info
 
 cmd_description = """
 dtags - tag directories
 
-e.g. the command {y}tag ~/foo ~/bar @a @b ~/baz @a @c{x}:
+e.g. {y}tag ~/foo ~/bar @a @b ~/baz @a @c{x} maps:
 
-    adds to directory {c}~/foo{x} tags {p}@a @b{x}
-    adds to directory {c}~/bar{x} tags {p}@a @b{x}
-    adds to directory {c}~/baz{x} tags {p}@a @c{x}
+    directory {c}~/foo{x} to tags {p}@a @b{x}
+    directory {c}~/bar{x} to tags {p}@a @b{x}
+    directory {c}~/baz{x} to tags {p}@a @c{x}
 
-""".format(p=PINK, c=CYAN, y=YELLOW, x=CLEAR)
+""".format(p=PINK, c=CYAN, y=YELLOW, x=END)
 
-msg = 'Added tag {p}{{}}{x} to {c}{{}}{x}'.format(p=PINK, c=CYAN, x=CLEAR)
+msg = 'added tag {p}{{}}{x} to {c}{{}}{x}'.format(p=PINK, c=CYAN, x=END)
 
 
 def main():
-    tag_to_paths = load_tags()
-    parser = ArgumentParser(
-        prog='tag',
-        usage='tag [[<paths>] [<tags>]...]',
+    parser = argparse.ArgumentParser(
+        prog='dtags: tag',
+        usage='tag [[path] [tag]]',
         description=cmd_description,
         formatter_class=HelpFormatter
     )
@@ -35,10 +31,11 @@ def main():
         'arguments',
         type=str,
         nargs='+',
-        metavar='[<paths>] [<tags>]',
+        metavar='[path] [tag]',
         help='directory paths and tag names'
     )
-    parsed = parser.parse_args()
+    args = parser.parse_args()
+    mapping = load_mapping()
 
     # Tracking variables and collectors
     updates = []
@@ -46,10 +43,9 @@ def main():
     parsing_paths = True
     tags_collected = set()
     paths_collected = set()
-
     # Iterate through the arguments and pair up tags with paths
-    while arg_index < len(parsed.arguments):
-        arg = parsed.arguments[arg_index]
+    while arg_index < len(args.arguments):
+        arg = args.arguments[arg_index]
         if parsing_paths and arg.startswith('@'):
             if len(paths_collected) == 0:
                 parser.error('expecting paths before {}'.format(arg))
@@ -58,13 +54,13 @@ def main():
             paths_collected.add(arg)
             arg_index += 1
         elif not parsing_paths and arg.startswith('@'):
-            tag_name_has_alphabet = False
-            for ch in arg[1:]:
-                if ch not in TAG_NAME_CHARS:
-                    parser.error('bad char {} in tag name {}'.format(ch, arg))
-                tag_name_has_alphabet |= ch.isalpha()
-            if not tag_name_has_alphabet:
-                parser.error('no alphabets in tag name {}'.format(arg))
+            tag_has_alpha = False
+            for char in arg[1:]:
+                if char not in ALLOWED_CHARS:
+                    parser.error('bad char {} in tag {}'.format(char, arg))
+                tag_has_alpha |= char.isalpha()
+            if not tag_has_alpha:
+                parser.error('no alphabets in tag {}'.format(arg))
             tags_collected.add(arg)
             arg_index += 1
         else:
@@ -74,24 +70,16 @@ def main():
     if parsing_paths:
         parser.error('expecting a tag name')
     updates.append((tags_collected, paths_collected))
-
-    # Apply updates and message
+    # Apply changes
     messages = set()
     for tags, paths in updates:
-        valid_paths = [p for p in paths if os.path.isdir(p)]
-        if len(valid_paths) == 0:
-            continue
         for tag in tags:
-            if tag not in tag_to_paths:
-                tag_to_paths[tag] = {}
-            for path in valid_paths:
-                full_path = expand_path(path)
-                short_path = shrink_path(path)
-                tag_to_paths[tag][full_path] = short_path
-                messages.add(msg.format(tag, full_path))
-    save_tags(tag_to_paths)
-    if messages:
-        print('\n'.join(messages))
-
-if __name__ == '__main__':
-    main()
+            if tag not in mapping:
+                mapping[tag] = set()
+            for path in paths:
+                path = collapse_path(path)
+                mapping[tag].add(path)
+                messages.add(msg.format(tag, path))
+    save_mapping(mapping)
+    for message in messages:
+        info(message)
