@@ -1,107 +1,159 @@
+"""DTags configuration."""
+
 import os
-import json
+import errno
+import shutil
+from collections import defaultdict
 
-from dtags.chars import TAG_NAME_CHARS
-from dtags.utils import halt, expand_path, is_dict, is_list, is_str
+from dtags import DTAGS_DIR, TAGS_FILE, MAPPING_FILE
+from dtags.chars import ALLOWED_CHARS
+from dtags.exceptions import ParseError
+from dtags.utils import halt, expand_path, collapse_path, msgify, rm_file
 
-TAGS_FILE_PATH = expand_path('~/.dtags')
-TEMP_FILE_PATH = TAGS_FILE_PATH + '.tmp'
 
-
-def load_tags():
-    """Load the tags from disk.
-
-    Return a dictionary which maps tag names to sub-dictionaries, which in
-    turn maps fully expanded paths to unexpanded paths like this:
-
-    {
-        "@app" : {
-            "/home/user/app/backend": "~/app/backend",
-            "/home/user/app/frontend": "~/app/frontend",
-        },
-        "@frontend": {
-            "/home/user/app/frontend": "~/app/frontend",
-        },
-        "@backend": {
-            "/home/user/app/backend": "~/app/backend",
-        }
-        ...
-    }
+def load_mapping():
+    """Load the tag-to-paths mapping from the disk.
 
     :return: the tags loaded from the disk
-    """
-    if not os.path.exists(TAGS_FILE_PATH):
-        try:
-            with open(TAGS_FILE_PATH, 'w') as open_file:
-                json.dump({}, open_file)
-            return {}
-        except (IOError, OSError):
-            halt('Failed to initialize {}'.format(TAGS_FILE_PATH))
-    else:
-        try:
-            with open(TAGS_FILE_PATH, 'r') as open_file:
-                json_str = open_file.read().strip()
-                if not json_str:
-                    return {}
-                tag_data = json.loads(json_str)
-                if not tag_data:
-                    return {}
-                else:
-                    return {
-                        tag: {expand_path(path): path for path in paths}
-                        for tag, paths in tag_data.items()
-                    }
-        except (ValueError, IOError, OSError):
-            # TODO better error handling and messaging here
-            halt('Failed to load {}'.format(TAGS_FILE_PATH))
-
-
-def save_tags(tags):
-    """Save the tags to disk.
-
-    Convert the incoming tags dictionary to JSON and dump the content to the
-    file. For portability, only the unexpanded paths are saved.
-
-    :param tags: tags to save to disk
+    :rtype: dict
     """
     try:
-        with open(TEMP_FILE_PATH, 'w') as open_file:
-            json.dump(
-                {tag: sorted(paths.values()) for tag, paths in tags.items()},
-                open_file,
-                indent=4,
-                sort_keys=True
+        return parse_mapping(MAPPING_FILE)
+    except ParseError as parse_error:
+        halt(message=str(parse_error))
+    except (IOError, OSError) as parse_error:
+        if parse_error.errno != errno.ENOENT:
+            halt(
+                message='failed to read {}: {}'.format(
+                    MAPPING_FILE, msgify(parse_error.strerror)
+                ),
+                exit_code=parse_error.errno
             )
-    except IOError:
-        # TODO better error handling and messaging here
-        halt('Failed to write to {}'.format(TAGS_FILE_PATH))
-    else:
-        # Overwrite the old file with the new
-        os.rename(TEMP_FILE_PATH, TAGS_FILE_PATH)
+        else:
+            try:
+                os.makedirs(DTAGS_DIR)
+            except (IOError, OSError) as create_error:
+                if create_error.errno != errno.EEXIST:
+                    halt(
+                        message='failed to create directory {}: {}'.format(
+                            DTAGS_DIR, msgify(create_error.strerror)
+                        ),
+                        exit_code=create_error.errno
+                    )
+            try:
+                open(MAPPING_FILE, 'w').close()
+            except (IOError, OSError) as create_error:
+                if create_error.errno != errno.EEXIST:
+                    halt(
+                        message='failed to create mapping {}: {}'.format(
+                            MAPPING_FILE, msgify(create_error.strerror)
+                        ),
+                        exit_code=create_error.errno
+                    )
+            try:
+                open(TAGS_FILE, 'w').close()
+            except (IOError, OSError) as create_error:
+                if create_error.errno != errno.EEXIST:
+                    halt(
+                        message='failed to create tags {}: {}'.format(
+                            TAGS_FILE, msgify(create_error.strerror)
+                        ),
+                        exit_code=create_error.errno
+                    )
+            return {}  # Return empty mapping
 
 
-def check_tags(tags):
-    """Check the tags for correctness.
+def save_mapping(mapping):
+    """Save the mapping and the tags back to the disk.
 
-    :param tags: tags to check for correctness
-    :raise: ValueError
+    This function assumes that the mapping is already validated.
+
+    :param mapping: the mapping to save to disk
+    :type mapping: collections.Mapping
     """
-    if not is_dict(tags):
-        raise ValueError('expecting a JSON object')
-    for tag, paths in tags.items():
-        if not (is_str(tag) and tag.startswith('@')):
-            raise ValueError('invalid tag name {}'.format(tag))
-        tag_name_has_alphabet = False
-        for ch in tag[1:]:
-            if ch not in TAG_NAME_CHARS:
-                raise ValueError('bad char {} in tag name {}'.format(ch, tag))
-            tag_name_has_alphabet |= ch.isalpha()
-        if not tag_name_has_alphabet:
-            raise ValueError('no alphabets in tag name {}'.format(tag))
-        if not (is_list(paths) and len(paths) > 0):
-            raise ValueError('expecting a non-empty list for {}'.format(tag))
+    temp_mapping_file = MAPPING_FILE + '.tmp'
+    reverse_mapping = defaultdict(set)
+    for tag, paths in mapping.items():
         for path in paths:
-            if not (is_str(path) and os.path.isdir(expand_path(path))):
-                raise ValueError(
-                    'invalid directory path {} for {}'.format(path, tag)
-                )
+            reverse_mapping[path].add(tag)
+    try:
+        with open(temp_mapping_file, 'w') as open_file:
+            open_file.write('\n'.join(
+                ' '.join([path] + sorted(reverse_mapping[path]))
+                for path in sorted(reverse_mapping)
+            ))
+    except (IOError, OSError) as mapping_save_error:
+        rm_file(temp_mapping_file)
+        halt(
+            message='failed to write to {}: {}\n'.format(
+                temp_mapping_file, msgify(mapping_save_error.strerror)
+            ),
+            exit_code=mapping_save_error.errno
+        )
+    else:
+        temp_tags_file = TAGS_FILE + '.tmp'
+        try:
+            with open(temp_tags_file, 'w') as open_file:
+                open_file.write(' '.join(sorted(mapping)))
+        except (IOError, OSError) as tags_save_error:
+            rm_file(temp_tags_file, ignore_errors=True)
+            rm_file(temp_mapping_file, ignore_errors=True)
+            halt(
+                message='failed to write to {}: {}\n'.format(
+                    temp_tags_file, msgify(tags_save_error.strerror)
+                ),
+                exit_code=tags_save_error.errno
+            )
+        else:
+            os.rename(temp_tags_file, TAGS_FILE)
+            os.rename(temp_mapping_file, MAPPING_FILE)
+
+
+def parse_mapping(filename):
+    """Validate the mapping and return it.
+
+    Return a mapping of tag names to directory paths like this:
+    {
+        "@app" : {"~/app/backend", "~/app/frontend"},
+        "@frontend": {"~/app/frontend", "~/app/web"}
+    }
+
+    :param filename: the path of the mapping file to validate
+    :type filename: str
+    :return: the tags loaded from the disk
+    :rtype: dict
+    :raises: dtags.exceptions.ParseError
+    """
+    with open(filename, 'r') as open_file:
+        mapping = defaultdict(set)
+        line_num = 1
+        for line in open_file.readlines():
+            words = line.split()
+            if len(words) <= 1:
+                raise ParseError(filename, line_num, 'line malformed')
+            path, tags = expand_path(words[0]), words[1:]
+            for tag in tags:
+                if not tag.startswith('@'):
+                    raise ParseError(
+                        filename,
+                        line_num,
+                        'bad tag name {}'.format(tag)
+                    )
+                tag_has_alphabet = False
+                for char in tag[1:]:
+                    if char not in ALLOWED_CHARS:
+                        raise ParseError(
+                            filename,
+                            line_num,
+                            "bad char '{}' in tag name {}".format(char, tag)
+                        )
+                    tag_has_alphabet |= char.isalpha()
+                if not tag_has_alphabet:
+                    raise ParseError(
+                        filename,
+                        line_num,
+                        'no alphabets in tag name {}'.format(tag)
+                    )
+                mapping[tag].add(collapse_path(path))
+            line_num += 1
+        return mapping

@@ -1,50 +1,53 @@
-#!/usr/bin/env python
-
 import os
 import sys
-import json
 import shutil
+import argparse
 import subprocess
-
 from collections import defaultdict
-from argparse import ArgumentParser
 
-from dtags.config import TAGS_FILE_PATH
-from dtags.colors import PINK, CYAN, YELLOW, CLEAR
-from dtags.completion import ChoicesCompleter, autocomplete
-from dtags.config import load_tags, check_tags, save_tags
+from dtags import MAPPING_FILE
+from dtags.colors import RED, PINK, CYAN, YELLOW, END
+from dtags.config import load_mapping, save_mapping, parse_mapping
+from dtags.exceptions import ParseError
 from dtags.help import HelpFormatter
-from dtags.utils import halt, expand_path, shrink_path, msgify, safe_remove
+from dtags.utils import halt, info, is_dir, expand_path, collapse_path, rm_file
+
 
 cmd_description = """
 dtags - display tags and tagged directories
 
-e.g. the command {y}tags @a @b ~/foo ~/bar @c{x}:
+e.g. {y}tags @a @b ~/foo ~/bar @c{x} displays:
 
-    displays tags {p}@a @b @c{x}
-    displays all tags with directory {c}~/foo{x}
-    displays all tags with directory {c}~/bar{x}
+    tags {p}@a @b{x} and {p}@c{x}
+    all tags mapped to directory {c}~/foo{x}
+    all tags mapped to directory {c}~/bar{x}
 
-""".format(p=PINK, c=CYAN, y=YELLOW, x=CLEAR)
+""".format(p=PINK, c=CYAN, y=YELLOW, x=END)
+
+msg = 'removed path {r}{{}}{x} for {p}{{}}{x}'.format(r=RED, p=PINK, x=END)
 
 
 def main():
-    tag_to_paths = load_tags()
-    parser = ArgumentParser(
-        prog='tags',
+    parser = argparse.ArgumentParser(
+        prog='dtags: tags',
         description=cmd_description,
-        usage='tags [<options>] [<paths>] [<tags>]',
+        usage='tags [option] [target]',
         formatter_class=HelpFormatter
+    )
+    parser.add_argument(
+        '-c', '--clean',
+        action='store_true',
+        help='remove invalid directories'
     )
     parser.add_argument(
         '-e', '--edit',
         action='store_true',
-        help='Edit the tags directly using an editor'
+        help='edit the tags directly using an editor'
     )
     parser.add_argument(
-        '-x', '--expand',
+        '-u', '--user',
         action='store_true',
-        help='Expand the directory paths'
+        help='expand the user in the directory paths'
     )
     parser.add_argument(
         '-r', '--reverse',
@@ -52,94 +55,98 @@ def main():
         action='store_true'
     )
     parser.add_argument(
-        '-j', '--json',
-        help='display the raw JSON',
-        action='store_true'
-    )
-    parser.add_argument(
-        'search_terms',
+        'targets',
         type=str,
         nargs='*',
-        metavar='[<paths>] [<tags>]',
-        help='directory paths and tag names to display'
-    ).completer = ChoicesCompleter(tag_to_paths.keys())
-    autocomplete(parser)
-    parsed = parser.parse_args()
+        metavar='target',
+        help='directory path or tag name'
+    )
+    args = parser.parse_args()
 
-    if parsed.edit:
-        if parsed.search_terms:
-            raise parser.error('no arguments allowed with option -e/--edit')
-        edit_file_path = TAGS_FILE_PATH + '.edit'
-        shutil.copy2(TAGS_FILE_PATH, edit_file_path)
-        subprocess.call([os.environ.get('EDITOR', 'vi'), edit_file_path])
-        new_tag_to_paths = save_error = None
-        with open(edit_file_path, 'r') as edit_file:
-            try:
-                new_tag_to_paths = json.load(edit_file)
-            except ValueError as err:
-                save_error = 'Failed to save tags: {}'.format(msgify(err))
-            else:
-                try:
-                    check_tags(new_tag_to_paths)
-                except ValueError as err:
-                    save_error = 'Failed to save tags: {}'.format(err)
-        safe_remove(edit_file_path)
-        if save_error is not None:
-            halt(save_error)
-        save_tags({
-            tag: {expand_path(p): shrink_path(p) for p in paths}
-            for tag, paths in new_tag_to_paths.items()
-        })
-        print('New tags saved successfully')
-        sys.exit(0)
-
-    if len(tag_to_paths) == 0:
-        print('No tags defined')
-        sys.exit(0)
-
-    # Filter by any given tags and paths
-    # TODO optimize here if possible
-    if not parsed.search_terms:
-        if parsed.expand:
-            filtered = {t: ps.keys() for t, ps in tag_to_paths.items()}
+    if args.edit:
+        if args.clean or args.user or args.reverse or args.targets:
+            parser.error('no other arguments allowed with -e/--edit')
+        if 'EDITOR' not in os.environ:
+            parser.error('environment variable EDITOR not defined')
+        temp_mapping_file = MAPPING_FILE + '.tmp'
+        shutil.copy2(MAPPING_FILE, temp_mapping_file)
+        subprocess.call([os.environ['EDITOR'], temp_mapping_file])
+        try:
+            new_mapping = parse_mapping(temp_mapping_file)
+        except ParseError as err:
+            rm_file(temp_mapping_file)
+            halt(message=str(err))
         else:
-            filtered = {t: ps.values() for t, ps in tag_to_paths.items()}
-    else:
-        path_to_tags = defaultdict(set)
-        for tag, paths in tag_to_paths.items():
-            for path in paths.keys():
-                path_to_tags[path].add(tag)
-        filtered = {}
-        for term in parsed.search_terms:
-            if term in tag_to_paths:
-                if parsed.expand:
-                    filtered[term] = tag_to_paths[term].keys()
-                else:
-                    filtered[term] = tag_to_paths[term].values()
-            elif os.path.isdir(term):
-                term = expand_path(term)
-                if term in path_to_tags:
-                    for tag in path_to_tags[term]:
-                        if parsed.expand:
-                            filtered[tag] = tag_to_paths[tag].keys()
-                        else:
-                            filtered[tag] = tag_to_paths[tag].values()
+            save_mapping(new_mapping)
+            rm_file(temp_mapping_file)
+            info('new tags saved successfully')
+            sys.exit(0)
 
-    if parsed.json:
-        formatted = {tag: sorted(paths) for tag, paths in filtered.items()}
-        print(json.dumps(formatted, sort_keys=True, indent=4))
-    elif parsed.reverse:
+    mapping = load_mapping()
+    if len(mapping) == 0:
+        info('no tags defined')
+        sys.exit(0)
+
+    if args.clean:
+        if args.edit or args.user or args.reverse or args.targets:
+            parser.error('no other arguments allowed with -c/--clean')
+        messages = set()
+        for tag in list(mapping):
+            for path in list(mapping[tag]):
+                if not is_dir(path):
+                    mapping[tag].remove(path)
+                    messages.add(msg.format(path, tag))
+            if len(mapping[tag]) == 0:
+                mapping.pop(tag)
+        save_mapping(mapping)
+        if len(messages) > 0:
+            for message in sorted(messages):
+                info(message)
+        else:
+            info('nothing to clean')
+        sys.exit(0)
+
+    # Filter by given tags and/or paths
+    if not args.targets:
+        filtered = {
+            tag: map(expand_path, paths) if args.user else paths
+            for tag, paths in mapping.items()
+        }
+    else:
+        reverse_mapping = defaultdict(set)
+        for tag, paths in mapping.items():
+            for path in paths:
+                reverse_mapping[path].add(tag)
+        filtered = {}
+        for target in args.targets:
+            if target in mapping:
+                filtered[target] = (
+                    map(expand_path, mapping[target])
+                    if args.user else mapping[target]
+                )
+            else:
+                target = collapse_path(target)
+                if target in reverse_mapping:
+                    for tag in reverse_mapping[target]:
+                        filtered[tag] = (
+                            map(expand_path, mapping[tag])
+                            if args.user else mapping[tag]
+                        )
+    if args.reverse:
         reverse = defaultdict(set)
         for tag, paths in filtered.items():
             for path in paths:
                 reverse[path].add(tag)
         for path, tags in reverse.items():
-            print('{}{}{}'.format(CYAN, path, CLEAR))
-            print('{}{}{}\n'.format(PINK, ' '.join(sorted(tags)), CLEAR))
+            print('{}{}\n{}{}{}\n'.format(
+                CYAN if is_dir(path) else RED, path,
+                PINK, ' '.join(sorted(tags)), END
+            ))
     else:
         for tag, paths in sorted(filtered.items()):
-            print('{}{}{}'.format(PINK, tag, CLEAR))
-            print('{}{}{}\n'.format(CYAN, '\n'.join(sorted(paths)), CLEAR))
-
-if __name__ == '__main__':
-    main()
+            print('{}{}\n{}\n'.format(
+                PINK, tag,
+                '\n'.join('{}{}{}'.format(
+                    CYAN if is_dir(path) else RED, path, END
+                ) for path in sorted(paths))
+            ))

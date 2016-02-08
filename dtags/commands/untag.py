@@ -1,32 +1,28 @@
-#!/usr/bin/env python
-
-import os
 import argparse
 
 from dtags.help import HelpFormatter
-from dtags.colors import PINK, CYAN, YELLOW, CLEAR
-from dtags.config import load_tags, save_tags
-from dtags.utils import expand_path
+from dtags.colors import PINK, CYAN, YELLOW, END
+from dtags.config import load_mapping, save_mapping
+from dtags.utils import info, collapse_path
 
 cmd_description = """
 dtags - untag directories
 
-e.g. the command {y}untag ~/foo ~/bar @a @b ~/baz @c @d{x}:
+e.g. {y}untag ~/foo ~/bar @a @b ~/baz @c @d{x} removes:
 
-    removes from directory {c}~/foo{x} tags {p}@a @b{x}
-    removes from directory {c}~/bar{x} tags {p}@a @b{x}
-    removes from directory {c}~/baz{x} tags {p}@c @d{x}
+    tags {p}@a @b{x} from directory {c}~/foo{x}
+    tags {p}@a @b{x} from directory {c}~/bar{x}
+    tags {p}@c @d{x} from directory {c}~/baz{x}
 
-""".format(p=PINK, c=CYAN, y=YELLOW, x=CLEAR)
+""".format(p=PINK, c=CYAN, y=YELLOW, x=END)
 
-msg = 'Removed tag {p}{{}}{x} from {c}{{}}{x}'.format(p=PINK, c=CYAN, x=CLEAR)
+msg = 'removed tag {p}{{}}{x} from {c}{{}}{x}'.format(p=PINK, c=CYAN, x=END)
 
 
 def main():
-    tag_to_paths = load_tags()
     parser = argparse.ArgumentParser(
-        prog="untag",
-        usage="untag [<options>] [[<paths>] [<tags>]...]",
+        prog="dtags-untag",
+        usage="untag [option] [[path] [tag]]",
         description=cmd_description,
         formatter_class=HelpFormatter
     )
@@ -39,54 +35,51 @@ def main():
         'arguments',
         type=str,
         nargs=argparse.REMAINDER,
-        metavar='[paths] [tags]',
+        metavar='[[path] [tag]]',
         help='directory paths and tag names'
     )
-    parsed = parser.parse_args()
+    args = parser.parse_args()
+    mapping = load_mapping()
 
-    if parsed.all:
+    if args.all:
         # Collect all the paths and tags to remove
         messages = set()
         tags_to_remove = set()
         paths_to_remove = set()
-        for arg in parsed.arguments:
-            if arg in tag_to_paths:
+        for arg in args.arguments:
+            if arg.startswith('@'):
                 tags_to_remove.add(arg)
-            elif os.path.isdir(arg):
-                paths_to_remove.add(expand_path(arg))
-
-        # Untag all the paths specified
-        for tag, paths in tag_to_paths.items():
+            else:
+                paths_to_remove.add(collapse_path(arg))
+        # Remove all the specified paths
+        for tag, paths in mapping.items():
             for path in [p for p in paths if p in paths_to_remove]:
-                paths.pop(path)
+                paths.remove(path)
                 messages.add(msg.format(tag, path))
             if len(paths) == 0:
                 tags_to_remove.add(tag)
-
-        # Remove all the tags specified
+        # Remove all the specified tags
         for tag in tags_to_remove:
-            paths = tag_to_paths.pop(tag)
+            paths = mapping.pop(tag)
             for path in paths:
-                messages.add(msg.format(tag, expand_path(path)))
-
-        # Save the updated tags and print messages
-        save_tags(tag_to_paths)
-        if messages:
-            print('\n'.join(messages))
+                messages.add(msg.format(tag, collapse_path(path)))
+        # Save the changes and print messages
+        save_mapping(mapping)
+        for message in messages:
+            info(message)
     else:
-        # Initialize tracking variables and collectors
+        # Initialize trackers and collectors
         updates = []
         arg_index = 0
         parsing_paths = True
         tags_collected = set()
         paths_collected = set()
-
         # Iterate through the arguments and pair up tags with paths
-        while arg_index < len(parsed.arguments):
-            arg = parsed.arguments[arg_index]
+        while arg_index < len(args.arguments):
+            arg = args.arguments[arg_index]
             if parsing_paths and arg.startswith('@'):
-                if len(paths_collected) == 0:
-                    parser.error('excepting paths before {}'.format(arg))
+                if not paths_collected:
+                    parser.error('expecting paths before {}'.format(arg))
                 parsing_paths = False
             elif parsing_paths and not arg.startswith('@'):
                 paths_collected.add(arg)
@@ -101,28 +94,21 @@ def main():
         if parsing_paths:
             parser.error('expecting a tag name')
         updates.append((tags_collected, paths_collected))
-
-        # Apply updates and collect messages to print
+        # Apply the changes and collect messages to print
         messages = set()
         for tags, paths in updates:
             for tag in tags:
-                if tag not in tag_to_paths:
+                if tag not in mapping:
                     continue
                 for path in paths:
-                    if not os.path.isdir(path):
-                        continue
-                    full_path = expand_path(path)
-                    if full_path in tag_to_paths[tag]:
-                        tag_to_paths[tag].pop(full_path)
-                        messages.add(msg.format(tag, full_path))
-                if len(tag_to_paths[tag]) == 0:
+                    path = collapse_path(path)
+                    if path in mapping[tag]:
+                        mapping[tag].remove(path)
+                        messages.add(msg.format(tag, path))
+                if len(mapping[tag]) == 0:
                     # Remove the tag completely if it has no paths
-                    tag_to_paths.pop(tag)
-
+                    mapping.pop(tag)
         # Save the updated tags and print messages
-        save_tags(tag_to_paths)
-        if messages:
-            print('\n'.join(messages))
-
-if __name__ == '__main__':
-    main()
+        save_mapping(mapping)
+        for message in messages:
+            info(message)
