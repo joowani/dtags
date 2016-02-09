@@ -17,10 +17,6 @@ If there are multiple directory paths associated with
 a given tag, a selection menu is displayed to let the
 user choose which specific directory to go to.
 
-The @ symbol may be omitted. When there happens to be
-a directory with the same name as the that of the tag
-without the @ symbol, goto will cd to that directory.
-
 positional arguments:
   destination      the directory tag name or path
 
@@ -44,7 +40,7 @@ fi
 if [[ -d ${{1}} ]]; then
     cd ${{1}}
 else
-    dirpaths=(`grep -w ${{1}} "{mapping_file}" | cut -d' ' -f1`)
+    dirpaths=(`grep -E "(^| )${{1}}( |$)" "{mapping_file}" | cut -d' ' -f1`)
     if [[ ${{#dirpaths[@]}} == 0 ]]; then
         return 1
     elif (( ${{#dirpaths[@]}} == 1 )); then
