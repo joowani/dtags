@@ -15,7 +15,11 @@ help="dtags - go to the tagged directory
 
 If there are multiple directory paths associated with
 a given tag, a selection menu is displayed to let the
-user to choose which specific directory to go to.
+user choose which specific directory to go to.
+
+The @ symbol may be omitted. When there happens to be
+a directory with the same name as the that of the tag
+without the @ symbol, goto will cd to that directory.
 
 positional arguments:
   destination      the directory tag name or path
