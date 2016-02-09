@@ -2,9 +2,6 @@
 Directory tags for lazy programmers. 
 Inspired by [gr](https://github.com/mixu/gr).
 
-Please refer to the [release notes](https://github.com/joowani/dtags/releases) 
-for details on other API changes.
-
 #### Introduction
 
 Do you have too many git repositories or vagrant machines to manage? Does your 
@@ -23,6 +20,8 @@ need to run the following commands first:
 ~$ python dtags/scripts/migrate.py
 # Now you can run upgrade to the newer version
 ```
+Please refer to the [release notes](https://github.com/joowani/dtags/releases) 
+for details on other API changes.
 
 #### Installation
 
