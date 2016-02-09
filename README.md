@@ -2,13 +2,10 @@
 Directory tags for lazy programmers. 
 Inspired by [gr](https://github.com/mixu/gr).
 
-Please refer to the [release notes](https://github.com/joowani/dtags/releases) 
-for details on other API changes.
-
 #### Introduction
 
 Do you have too many git repositories or vagrant machines to manage? Does your 
-daily routine require you to go through the same directories over and over? 
+daily routine require you to switch between the same directories over and over? 
 Are you a lazy programmer who is always looking for shortcuts? If you answered
 *yes* to any of these questions, then **dtags** may be for you!
 
@@ -17,18 +14,19 @@ Are you a lazy programmer who is always looking for shortcuts? If you answered
 dtags v1.1.0 includes a config change which breaks backwards-compatibility (but 
 the change is for the better... I promise). So if you are using v1.0.9 or below
 and want to upgrade to the latest version while retaining your tags, you will 
-need to follow these steps first:
+need to run the following commands first:
 ```bash
 ~$ git clone https://github.com/joowani/dtags.git
 ~$ python dtags/scripts/migrate.py
 # Now you can run upgrade to the newer version
 ```
+Please refer to the [release notes](https://github.com/joowani/dtags/releases) 
+for details on other API changes.
 
 #### Installation
 
 Requirements:
 * Python 2.7+ or 3.4+
-* Bash 4+ or Zsh 5+
 
 Install using [pip](https://pip.pypa.io) 
 (respects [virtualenv](https://virtualenv.readthedocs.org)):
@@ -38,9 +36,13 @@ Install using [pip](https://pip.pypa.io)
 ~$ pip install --upgrade dtags
 ```
 
-Place the following lines (or similar) in your `.bashrc` or `.zshrc`
+Place the following lines in your `.bashrc` 
+(`.bash_profile` for OSX) or `.zshrc`
 ```bash
-autoload bashcompinit && bashcompinit  # needed for zsh auto-completion only
+# Enable auto-completion (for zsh only) 
+autoload bashcompinit && bashcompinit
+
+# Runtime configuration for dtags
 if command -v dtags-rc > /dev/null 2>&1; then . <(dtags-rc); fi
 ```
 
@@ -49,7 +51,7 @@ Once installed, you will have 5 commands at your disposal:
 
 #### Usage & Examples
 
-Tag directories using `tag`:
+Tag directories using `tag` (all tag names must begin with the `@` symbol):
 ```bash
 ~$ tag ~/frontend @frontend
 ~$ tag ~/backend @backend
@@ -59,8 +61,6 @@ Tag directories using `tag`:
 
 # Or equivalently
 ~$ tag ~/frontend @frontend @work ~/backend @backend @work ~/db ~/web @vm
-
-# All tag names must begin with the '@' symbol
 ```
 
 Execute commands in the tagged directories using `run`:
@@ -134,7 +134,7 @@ You can always use the `--help` option to find out more!
 
 #### Notes
 
-* dtags is _not_ supported on Windows
+* dtags does not support Windows yet
 * `run -p` hangs on interactive commands that wait on input (e.g. vim)
 * `run -p` dumps the entire output of the commands into memory
 * `run -p` sends *sigterm* to its child processes when killed
@@ -142,8 +142,7 @@ You can always use the `--help` option to find out more!
 
 #### To Do
 
-* Add Extension support
-* Allow the user to customize the header messages for the `run` command
-* Improve the configuration to include things other than just tags
+* Add extension support
+* Allow customization of the header messages for the `run` command
 * Warn the user when commands known to hang are executed with `run -p`
 * Add tests
