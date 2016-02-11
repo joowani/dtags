@@ -12,16 +12,16 @@ MAPPING = os.path.join(DTAGS, 'mapping')
 
 if __name__ == '__main__':
     if not os.path.isfile(DTAGS):
-        print('Nothing to migrate. You can upgrade dtags anytime!')
+        print('Nothing to migrate. You can upgrade dtags!')
         sys.exit(0)
     try:
         with open(DTAGS, 'r') as open_file:
             content = open_file.read().strip()
             mapping = json.loads(content) if content else {}
-            reverse_mapping = defaultdict(set)
+            rmapping = defaultdict(set)
             for tag, paths in mapping.items():
                 for path in paths:
-                    reverse_mapping[path].add(tag)
+                    rmapping[path].add(tag)
     except (ValueError, IOError, OSError) as e:
         sys.stderr.write('Failed to read {}: {}\n'.format(DTAGS, e))
         sys.exit(getattr(e, 'errno', 1))
@@ -30,8 +30,9 @@ if __name__ == '__main__':
         try:
             with open(temp_mapping_file, 'w') as open_file:
                 open_file.write('\n'.join(
-                    ' '.join([path] + sorted(reverse_mapping[path]))
-                    for path in sorted(reverse_mapping)
+                    ','.join([os.path.abspath(os.path.expanduser(path))] +
+                    [t[1:] for t in sorted(rmapping[path])])
+                    for path in sorted(rmapping)
                 ))
         except (IOError, OSError) as e:
             if os.path.isfile(temp_mapping_file):
@@ -42,7 +43,9 @@ if __name__ == '__main__':
             temp_tags_file = DTAGS + '.tags'
             try:
                 with open(temp_tags_file, 'w') as open_file:
-                    open_file.write(' '.join(sorted(mapping)))
+                    open_file.write(
+                        ' '.join(tag[1:] for tag in sorted(mapping))
+                    )
             except (IOError, OSError) as e:
                 for temp_file in [temp_mapping_file, temp_tags_file]:
                     if os.path.isfile(temp_file):
@@ -54,5 +57,5 @@ if __name__ == '__main__':
                 os.mkdir(DTAGS)
                 os.rename(temp_tags_file, TAGS)
                 os.rename(temp_mapping_file, MAPPING)
-                print('Migration complete. You can now upgrade dtags anytime!')
+                print('Migration complete. You can now upgrade dtags!')
                 sys.exit(0)

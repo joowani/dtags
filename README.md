@@ -1,6 +1,5 @@
 # dtags 
 Directory tags for lazy programmers. 
-Inspired by [gr](https://github.com/mixu/gr).
 
 #### Introduction
 
@@ -9,140 +8,99 @@ daily routine require you to switch between the same directories over and over?
 Are you a lazy programmer who is always looking for shortcuts? If you answered
 *yes* to any of these questions, then **dtags** may be for you!
 
+#### Features
+
+**dtags** is a small command line tool which lets you:
+
+* Tag and un-tag directories
+* Change directories quickly via tags (similar to aliases easier to manage)
+* Execute commands in multiple directories at once
+
+The goal of **dtags** is to save the user as many keystrokes as possible while
+being flexible and easy to use.
+
 #### Announcements
 
-dtags v1.1.0 includes a config change which breaks backwards-compatibility (but 
-the change is for the better... I promise). So if you are using v1.0.9 or below
-and want to upgrade to the latest version while retaining your tags, you will 
-need to run the following commands first:
+dtags **v2.x** has configuration changes that are not backwards-compatible. 
+If you want to upgrade from **v1.x** while retaining your tags, you will need 
+to run the migration script *before* you upgrade:
 ```bash
 ~$ git clone https://github.com/joowani/dtags.git
 ~$ python dtags/scripts/migrate.py
-# Now you can run upgrade to the newer version
 ```
-Please refer to the [release notes](https://github.com/joowani/dtags/releases) 
-for details on other API changes.
 
 #### Installation
 
 Requirements:
 * Python 2.7+ or 3.4+
+* Bash, Zsh or Fish (recent versions recommended)
 
 Install using [pip](https://pip.pypa.io) 
-(respects [virtualenv](https://virtualenv.readthedocs.org)):
+(dtags respects [virtualenv](https://virtualenv.readthedocs.org)):
 ```bash
-# You may need to use sudo depending on your setup
-~$ pip install --upgrade pip setuptools
-~$ pip install --upgrade dtags
+~$ pip install dtags
 ```
 
-Place the following lines in your `.bashrc` 
-(`.bash_profile` for OSX) or `.zshrc`
-```bash
-# Enable auto-completion (for zsh only) 
-autoload bashcompinit && bashcompinit
+If you use `zsh` or `bash`, place the following in your `.bashrc` 
+(`.bash_profile` on OSX) or `.zshrc`:
 
-# Runtime configuration for dtags
-if command -v dtags-rc > /dev/null 2>&1; then . <(dtags-rc); fi
-```
+```command -v dtags > /dev/null 2>&1 && . <(dtags shell)```
+
+If you use `fish`, place the following in your `~/.config/fish/config.fish`:
+
+```command -v dtags > /dev/null 2>&1; and dtags shell | source;```
 
 Once installed, you will have 5 commands at your disposal: 
-`tag`, `untag`, `run`, `tags` and `goto`. 
+`tag`, `untag`, `d`, `e` and `dtags`
 
-#### Usage & Examples
+Please ensure you don't have any aliases with the same names.
 
-Tag directories using `tag` (all tag names must begin with the `@` symbol):
+#### Usage Examples
+
+Tag or un-tag directories with commands `tag` and `untag`:
 ```bash
-~$ tag ~/frontend @frontend
-~$ tag ~/backend @backend
-~$ tag ~/frontend ~/backend @work
-~$ tag ~/db @vm
-~$ tag ~/web @vm
-
-# Or equivalently
-~$ tag ~/frontend @frontend @work ~/backend @backend @work ~/db ~/web @vm
+# Usage: tag <dir> [<tag>...]
+~$ tag /home/app            # add tag 'app' to /home/app
+~$ tag /home/web dev work   # add tags 'dev' and 'work' to /home/web
+```
+```bash
+# Usage: untag <dir> [<tag>...]
+~$ untag /home/web dev      # remove tag 'dev' from /home/web
+~$ untag /home/app          # remove all tags from /home/app 
 ```
 
-Execute commands in the tagged directories using `run`:
+Change directories quickly with command `d` (meant to replace `cd`):
 ```bash
-# Execute 'git fetch origin' in all directories tagged @project
-~$ run @project git fetch origin
-
-# Execute 'git status -sb' in all directories tagged @frontend and @backend
-~$ run @frontend @backend git status -sb
-
-# Execute 'vagrant status' in all directories tagged @vms
-~$ run @vms vagrant status
-
-# Directory paths can be specified along with tags
-~$ run @backend ~/scripts ~/redis ls -la
-
-# The command can be executed in parallel if it doesn't wait on input
-~$ run -p @backend 'sleep 5 && echo done'
-~$ run -p @project git pull
-~$ run -p @vms vagrant up
-
-# Display the exit code for each execution
-~$ run -e @backend ls foobar
-
-# Execute the command in interactive mode to use aliases and functions
-~$ run -i @project 'myalias && myfunc'
+# Usage: d [<tag>|<dir>]
+~$ d                        # go to the home directory 
+~$ d frontend               # go to the directory tagged 'frontend'
+~$ d ~/home/app             # go to directory ~/home/app 
 ```
 
-Display/edit tags using `tags`:
+Execute commands in the directories with command `e`:
 ```bash
-~$ tags						    # show all tags
-~$ tags ~/foobar                # show only the tags with the specified path
-~$ tags @backend @frontend      # show only the specified tags
-~$ tags --user                  # expand user (~)
-~$ tags --reverse               # show the reverse mapping
-~$ tags --edit                  # edit the tags directly using an editor
-~$ tags --clean                 # remove stale directory paths and tags
+# Usage: e [-p] <targets> <command> [<arg>...]
+~$ e app ls                 # execute 'ls' in directories tagged 'app'
+~$ e vm vagrant up          # execute 'vagrant up' in directories tagged 'vm'
+~$ e repo git pull          # execute 'git pull' in parallel
 ```
 
-Disassociate tags and directory paths using `untag`:
+Manage the tags with command `dtags`:
 ```bash
-# Remove tags @frontend and @backend from ~/frontend and ~/backend respectively
-~$ untag ~/frontend @frontend ~/backend @backend
-
-# Remove tags @vms from directories /vagrant/web and /vagrant/db
-~$ untag /vagrant/web /vagrant/db @vms
-
-# Remove the tag @backend completely
-~$ untag --all @backend
-
-# Remove the directory path ~/vms/web from all tags
-~$ untag --all ~/vms/web 
+~$ dtags				    # show the directories-to-tags mapping
+~$ dtags list ~             # show all tags mapped to the home directory
+~$ dtags list foo bar       # show all directories with tags 'foo' or 'bar'
+~$ dtags reverse            # show the tags-to-directories mapping
+~$ dtags edit               # edit tags and directories using an editor
+~$ dtags clean              # remove stale directory paths and tags
 ```
 
-Quickly `cd` to the tagged directories using `goto`:
-```bash
-# If there is a 1-to-1 mapping between the directory and the tag, cd right away
-~/old$ goto @new  # or you can omit the '@' symbol and do 'goto new'
-~/new$
-
-# If multiple directories are mapped to the tag, prompt for selection then cd
-~/old$ goto @multiple  # or 'goto multiple'
-1: ~/foo
-2: ~/bar
-3: ~/baz
-
-Select directory (1-3): 2
-~/bar$
-```
 You can always use the `--help` option to find out more!
 
 #### Notes
 
-* dtags does not support Windows yet
-* `run -p` hangs on interactive commands that wait on input (e.g. vim)
-* `run -p` dumps the entire output of the commands into memory
-* `run -p` sends *sigterm* to its child processes when killed
-* `run -i` can be slow depending on the loading time of your shell
-
-#### To Do
-
-* Add extension support
-* Allow customization of the header messages for the `run` command
-* Warn the user when commands known to hang are executed with `run -p`
-* Add tests
+* Windows is not supported yet
+* `e -p` hangs on interactive commands that wait on input (e.g. vim)
+* `e -p` sends *sigterm* to its child processes when killed
+* `e` can be slowed down by shell startup (e.g. oh-my-zsh)
+* `e` decides which shell you are using with the environment variable $SHELL

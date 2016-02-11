@@ -1,101 +1,65 @@
-"""DTags utility functions."""
+from __future__ import unicode_literals
 
 import os
 import sys
-import errno
-import shutil
 
 
-def info(message):
-    """Print the message to stdout.
+def finish(message):
+    """Write the message to stdout and exit with 0.
 
-    :param message: info message
-    :type message: str
+    :param message: the message to write
     """
-    sys.stdout.write('dtags: {}\n'.format(message))
+    sys.stdout.write(message + '\n')
+    sys.exit(0)
 
 
-def halt(message, exit_code=errno.EPERM):
-    """Print the message to stderr and exit with the exit code.
+def warn(message):
+    """Write the warning message to stderr.
 
-    :param message: error message
-    :type message: str
-    :param exit_code: linux exit code
-    :type exit_code: int
+    :param message: the warning message to write
     """
-    sys.stderr.write('dtags: error: {}\n'.format(message))
+    sys.stderr.write(message + '\n')
+
+
+def abort(message, exit_code=1):
+    """Write the message to stderr and exit with the given exit code.
+
+    :param message: the error message to write
+    :param exit_code: the exit code
+    """
+    sys.stderr.write(message + '\n')
     sys.exit(exit_code)
 
 
-def expand_path(path):
-    """Fully expand a directory path.
+def expand(path):
+    """Fully expand the given file path.
 
-    :param path: the directory path to expand
-    :type path: str
-    :return: expanded path
-    :rtype: str
+    :param path: the file path to expand
+    :return: the expanded path
     """
-    return os.path.realpath(os.path.expanduser(path))
+    return os.path.abspath(os.path.expanduser(path))
 
 
-def collapse_path(path):
-    """Abbreviate the 'home' portion of the path to '~'.
+def close_stdio():
+    """Close stdout and stderr."""
+    try:
+        sys.stdout.close()
+    except IOError:
+        pass
+    try:
+        sys.stderr.close()
+    except IOError:
+        pass
 
-    :param path: the directory path to shorten
-    :returns: the shortened path
+
+def rm_files(*filenames):
+    """Remove the files from disk while ignoring ENOENT.
+
+    :param filenames: the files to remove
     """
-    path = expand_path(path)
-    home = expand_path('~')
-    return path.replace(home, '~') if path.startswith(home) else path
-
-
-def is_dir(path):
-    """Check whether or not the path is a directory.
-
-    :param path: the path to check
-    :type path: str
-    :returns: True if the path is a directory else False
-    :rtype: bool
-    """
-    return os.path.isdir(expand_path(path))
-
-
-def is_file(path):
-    """Check whether or not the path is a file.
-
-    :param path: the path to check
-    :type path: str
-    :returns: True if the path is a file else False
-    :rtype: bool
-    """
-    return os.path.isfile(expand_path(path))
-
-
-def rm_file(path):
-    """Remove the file from disk.
-
-    :param path: the path of the file to remove
-    :type path: str
-    """
-    if is_dir(path):
-        shutil.rmtree(path, ignore_errors=True)
-    elif is_file(path):
+    for filename in filenames:
         try:
-            os.remove(path)
-        except OSError as err:
-            if err.errno != errno.ENOENT:
-                raise err
-
-
-def msgify(msg):
-    """Sanitize the error message.
-
-    Convert the first character of the message to lowercase and remove all
-    periods.
-
-    :param msg: the message the sanitize
-    :type msg: str
-    :returns: the sanitized message
-    :rtype: str
-    """
-    return (msg[0].lower() + msg[1:]).rsplit('.')[0] if msg else ''
+            os.remove(filename)
+        except OSError as remove_error:
+            if remove_error.errno != 2:  # ENOENT
+                raise remove_error

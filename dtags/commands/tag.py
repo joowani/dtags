@@ -1,85 +1,77 @@
-import argparse
+from __future__ import unicode_literals, print_function
 
-from dtags.chars import ALLOWED_CHARS
-from dtags.colors import PINK, CYAN, YELLOW, END
+import os
+import sys
+import atexit
+import signal
+
+from dtags import style
+from dtags.chars import get_invalid_path_chars, get_invalid_tag_chars
 from dtags.config import load_mapping, save_mapping
-from dtags.help import HelpFormatter
-from dtags.utils import collapse_path, info
+from dtags.utils import close_stdio, abort, finish, expand
+from dtags.version import VERSION
 
-cmd_description = """
-dtags - tag directories
+USAGE = """Usage:
+  tag <dir> [<tag>...]
+  tag --help
+  tag --version
+"""
+DESCRIPTION = """
+Arguments:
+  dir     The directory path
+  tag     The directory tag
 
-e.g. {y}tag ~/foo ~/bar @a @b ~/baz @a @c{x} maps:
-
-    directory {c}~/foo{x} to tags {p}@a @b{x}
-    directory {c}~/bar{x} to tags {p}@a @b{x}
-    directory {c}~/baz{x} to tags {p}@a @c{x}
-
-""".format(p=PINK, c=CYAN, y=YELLOW, x=END)
-
-msg = 'added tag {p}{{}}{x} to {c}{{}}{x}'.format(p=PINK, c=CYAN, x=END)
+Tag the target directory. If no tag names are given,
+the basename of the directory path is used instead."""
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        prog='dtags: tag',
-        usage='tag [[path] [tag]]',
-        description=cmd_description,
-        formatter_class=HelpFormatter
-    )
-    parser.add_argument(
-        'arguments',
-        type=str,
-        nargs='+',
-        metavar='[path] [tag]',
-        help='directory paths and tag names'
-    )
-    args = parser.parse_args()
-    mapping = load_mapping()
-
-    # Tracking variables and collectors
-    updates = []
-    arg_index = 0
-    parsing_paths = True
-    tags_collected = set()
-    paths_collected = set()
-    # Iterate through the arguments and pair up tags with paths
-    while arg_index < len(args.arguments):
-        arg = args.arguments[arg_index]
-        if parsing_paths and arg.startswith('@'):
-            if len(paths_collected) == 0:
-                parser.error('expecting paths before {}'.format(arg))
-            parsing_paths = False
-        elif parsing_paths and not arg.startswith('@'):
-            paths_collected.add(arg)
-            arg_index += 1
-        elif not parsing_paths and arg.startswith('@'):
-            tag_has_alpha = False
-            for char in arg[1:]:
-                if char not in ALLOWED_CHARS:
-                    parser.error('bad char {} in tag {}'.format(char, arg))
-                tag_has_alpha |= char.isalpha()
-            if not tag_has_alpha:
-                parser.error('no alphabets in tag {}'.format(arg))
-            tags_collected.add(arg)
-            arg_index += 1
-        else:
-            updates.append((tags_collected, paths_collected))
-            tags_collected, paths_collected = set(), set()
-            parsing_paths = True
-    if parsing_paths:
-        parser.error('expecting a tag name')
-    updates.append((tags_collected, paths_collected))
-    # Apply changes
-    messages = set()
-    for tags, paths in updates:
-        for tag in tags:
-            if tag not in mapping:
-                mapping[tag] = set()
-            for path in paths:
-                path = collapse_path(path)
-                mapping[tag].add(path)
-                messages.add(msg.format(tag, path))
-    save_mapping(mapping)
-    for message in messages:
-        info(message)
+    atexit.register(close_stdio)
+    # http://stackoverflow.com/questions/14207708
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    args = sys.argv[1:]
+    if not args:
+        finish(USAGE + DESCRIPTION)
+    head, tail = args[0], args[1:]
+    if head == '--help':
+        finish(USAGE + DESCRIPTION)
+    elif head == '--version':
+        finish('Version ' + VERSION)
+    elif head.startswith('-'):
+        abort(USAGE + 'Invalid argument: ' + style.bad(head))
+    path = expand(head)
+    invalid_path_chars = get_invalid_path_chars(path)
+    if invalid_path_chars:
+        abort('Directory path {} contains bad characters {}'.format(
+            style.bad(path), style.bad_chars(invalid_path_chars)
+        ))
+    if not os.path.isdir(path):
+        abort('Invalid directory ' + style.bad(path))
+    mapping, excluded = load_mapping()
+    tags_added = set()
+    if not tail:
+        tail.append(os.path.basename(path))
+    for tag in tail:
+        if not tag[0].isalpha():
+            abort('Tag name {} does not start with an alphabet'
+                  .format(style.bad(tag)))
+        if ' ' in tag:
+            abort('Tag name {} contains whitespaces'.format(style.bad(tag)))
+        invalid_tag_chars = get_invalid_tag_chars(tag)
+        if invalid_tag_chars:
+            abort('Tag name {} contains bad characters {}'.format(
+                style.bad(tag), style.bad_chars(invalid_tag_chars)
+            ))
+        if path not in mapping[tag]:
+            mapping[tag].add(path)
+            tags_added.add(tag)
+    if tags_added or excluded:
+        save_mapping(mapping)
+    if excluded:
+        print('Cleaned the following invalid entries:\n' + excluded + '\n')
+    if not tags_added:
+        finish('Nothing to do')
+    else:
+        finish(style.path(path) + ' ' + ' '.join(
+            style.sign('+') + style.tag(tag) for tag in sorted(tags_added)
+        ))
