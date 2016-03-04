@@ -30,9 +30,8 @@ INDEX_ERR = 'Index out of range: %s\n'
 INPUT_ERR = 'Invalid input: %s\n'
 PROMPT = '\nSelect directory (1 - %s): '
 
-
+# Style the messages if the output is going to a terminal
 tty = True
-# Color the messages if the output is going to a terminal
 ARG_ERR_TTY = '%sInvalid argument: ' + style.bad('%s\n', tty=tty)
 CHOICE_TTY = style.msg('%s: ', tty=tty) + style.path('%s\n', tty=tty)
 DEST_ERR_TTY = '%sInvalid destination: ' + style.bad('%s\n', tty=tty)

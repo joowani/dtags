@@ -71,7 +71,7 @@ def bad_chars(value, tty=TTY):
 
     :param value: the set of invalid characters to style
     :param tty: True iff the output is going to a terminal
-    :return: the styled characters
+    :return: the styled invalid characters
     """
     if tty:
         return ' '.join("{}{}{}".format(RED, c, CLEAR) for c in value)
@@ -89,7 +89,7 @@ def cmd(value, tty=TTY):
 
 
 def bad(value, tty=TTY):
-    """Style the invalid (e.g. directory path, tag, argument).
+    """Style the invalid entry (e.g. directory path, tag, argument).
 
     :param value: the invalid value to style
     :param tty: True iff the output is going to a terminal

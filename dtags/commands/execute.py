@@ -33,15 +33,13 @@ Options:
   --help      Display the help menu
   --version   Display the version
 
-Execute commands in one or more directories."""
+Execute commands in one or more directories.
+Multiple targets can be given by separating
+them with commas and without whitespaces."""
 
 
 def _send_sigterm(child_process):
-    """Send SIGTERM to the specified child process.
-
-    :param child_process: the child process to kill
-    :type child_process: subprocess.Popen
-    """
+    """Send SIGTERM to the specified child process."""
     try:
         os.killpg(os.getpgid(child_process.pid), signal.SIGKILL)
     except OSError as kill_error:
@@ -66,18 +64,13 @@ def _cleanup_resources():
 
 
 def _handle_signal(signum, *_):
-    """Send SIGTERM to child processes.
-
-    :param signum: the signal number
-    :type signum: int
-    """
+    """Send SIGTERM to all child processes."""
     _cleanup_resources()
     sys.exit(127 + signum)
 
 
 def main():
     atexit.register(_cleanup_resources)
-    # http://stackoverflow.com/questions/14207708
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
     mapping, excluded = load_mapping()
     if excluded:
