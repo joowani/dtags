@@ -1,105 +1,119 @@
-# dtags 
-Directory tags for lazy programmers. 
+# DTags - Directory tags for lazy programmers. 
 
-#### Introduction
+## Introduction
 
 Do you have too many git repositories or vagrant machines to manage? Does your 
-daily routine require you to switch between the same directories over and over? 
-Are you a lazy programmer who is always looking for shortcuts? If you answered
-*yes* to any of these questions, then **dtags** may be for you!
+work require you to switch between the same directories over and over? Are you 
+a lazy programmer who is always looking for shortcuts? If you answered *yes* to
+any of the above questions, then **dtags** may be for you!
 
-#### Features
+## Features
 
-**dtags** is a small command line tool which lets you:
+**dtags** is a lightweight command line tool which lets you:
 
 * Tag and un-tag directories
-* Change directories quickly via tags (similar to aliases easier to manage)
-* Execute commands in multiple directories at once
+* Change directories quickly by tag name
+* Automate command executions in multiple directories
 
-The goal of **dtags** is to save the user as many keystrokes as possible while
-being flexible and easy to use.
+The goal is to save the user as many keystrokes as possible while 
+maintaining clarity, flexibility and usability.
 
-#### Announcements
+## Installation
 
-dtags **v2.x** has configuration changes that are not backwards-compatible. 
-If you want to upgrade from **v1.x** while retaining your tags, you will need 
-to run the migration script *before* you upgrade:
-```bash
-~$ git clone https://github.com/joowani/dtags.git
-~$ python dtags/scripts/migrate.py
-```
+**Step 1**: Check requirements
 
-#### Installation
-
-Requirements:
 * Python 2.7+ or 3.4+
-* Bash, Zsh or Fish (recent versions recommended)
+* Bash, Zsh or Fish with tab-completion enabled
 
-Install using [pip](https://pip.pypa.io) 
-(dtags respects [virtualenv](https://virtualenv.readthedocs.org)):
+**Step 2**: Install using [pip](https://pip.pypa.io) 
+(respects [virtualenv](https://virtualenv.readthedocs.org)):
 ```bash
 ~$ pip install dtags
 ```
 
-If you use `zsh` or `bash`, place the following in your `.bashrc` 
-(`.bash_profile` on OSX) or `.zshrc`:
+**Step 3**: Place the following line in your shell runtime config:
+```bash
+# For zsh, place in ~/.zshrc:
+command -v dtags > /dev/null 2>&1 && . <(dtags shell zsh)
 
-```command -v dtags > /dev/null 2>&1 && . <(dtags shell)```
+# For bash, place in ~/.bashrc (or ~/.bash_profile for OSX):
+command -v dtags > /dev/null 2>&1 && . <(dtags shell bash)
 
-If you use `fish`, place the following in your `~/.config/fish/config.fish`:
+# For fish, place in ~/.config/fish/config.fish:
+command -v dtags > /dev/null 2>&1; and dtags shell fish | source
+```
 
-```command -v dtags > /dev/null 2>&1; and dtags shell | source;```
+**Step 4**. Restart your shell.
 
-Once installed, you will have 5 commands at your disposal: 
-`tag`, `untag`, `d`, `e` and `dtags`
 
-Please ensure you don't have any aliases with the same names.
+For v1 users:
+   * dtags v2 has config changes that are *not* backwards-compatible
+   * If you want to upgrade from v1, you need to run the migration script:
+      
+      ```bash
+       ~$ git clone https://github.com/joowani/dtags.git
+       ~$ python dtags/scripts/migrate.py
+       ```
+       
+   * Or if you don't mind losing your tags, simply run `rm -rf ~/.dtags`.
 
-#### Usage Examples
 
-Tag or un-tag directories with commands `tag` and `untag`:
+Once installed, you will have 5 commands at your disposal: `tag`, `untag`, 
+`d`, `e` and `dtags` (make sure that you don't have any aliases with the same 
+names).
+
+## Usage Examples
+
+Tag directories with `tag`:
 ```bash
 # Usage: tag <dir> [<tag>...]
-~$ tag /home/app            # add tag 'app' to /home/app
-~$ tag /home/web dev work   # add tags 'dev' and 'work' to /home/web
+
+~$ tag ~/app            # add tag 'app' to ~/app
+~$ tag ~/web dev work   # add tags 'dev' and 'work' to ~/web
 ```
+
+Un-tag directories with `untag`:
 ```bash
 # Usage: untag <dir> [<tag>...]
-~$ untag /home/web dev      # remove tag 'dev' from /home/web
-~$ untag /home/app          # remove all tags from /home/app 
+
+~$ untag ~/web dev      # remove tag 'dev' from ~/web
+~$ untag ~/app          # remove all tags from ~/app 
 ```
 
-Change directories quickly with command `d` (meant to replace `cd`):
+Change directories with `d` (meant to fully replace `cd`!):
 ```bash
 # Usage: d [<tag>|<dir>]
-~$ d                        # go to the home directory 
-~$ d frontend               # go to the directory tagged 'frontend'
-~$ d ~/home/app             # go to directory ~/home/app 
+
+~$ d                    # go to the user's home directory 
+~$ d frontend           # go to the directory tagged 'frontend'
+~$ d many_dirs          # prompt the user to select the destination         
+~$ d ~/app              # go to ~/app
 ```
 
-Execute commands in the directories with command `e`:
+Execute commands in the directories with `e`:
 ```bash
 # Usage: e [-p] <targets> <command> [<arg>...]
-~$ e app ls                 # execute 'ls' in directories tagged 'app'
-~$ e vm vagrant up          # execute 'vagrant up' in directories tagged 'vm'
-~$ e repo git pull          # execute 'git pull' in parallel
+
+~$ e app ls             # execute 'ls' in directories tagged 'app'
+~$ e vm vagrant up      # execute 'vagrant up' in directories tagged 'vm'
+~$ e repo git pull      # execute 'git pull' in parallel
 ```
 
-Manage the tags with command `dtags`:
+Display and manage tags with `dtags` (I like to have this aliased to `tags`):
 ```bash
-~$ dtags				    # show the directories-to-tags mapping
-~$ dtags list ~             # show all tags mapped to the home directory
-~$ dtags list foo bar       # show all directories with tags 'foo' or 'bar'
-~$ dtags reverse            # show the tags-to-directories mapping
-~$ dtags edit               # edit tags and directories using an editor
-~$ dtags clean              # remove stale directory paths and tags
+~$ dtags				# display directories-to-tags mapping
+~$ dtags list ~         # display all tags mapped to the home directory
+~$ dtags list foo bar   # display all directories with tags 'foo' or 'bar'
+~$ dtags reverse        # display tags-to-directories mapping
+~$ dtags edit           # edit tags and directories via editor (e.g. vim)
+~$ dtags clean          # remove invalid/stale tags and directories
 ```
 
 You can always use the `--help` option to find out more!
 
-#### Notes
+## Notes
 
-* Windows is not supported yet
+* Windows is currently not supported
 * `e -p` hangs on interactive commands that wait on input (e.g. vim)
 * `e -p` sends *sigterm* to its child processes when killed
 * `e` can be slowed down by shell startup (e.g. oh-my-zsh)
