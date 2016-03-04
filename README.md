@@ -1,4 +1,4 @@
-# DTags - Directory tags for lazy programmers. 
+# DTags - Directory Tags for Lazy Programmers. 
 
 ## Introduction
 
@@ -22,11 +22,10 @@ maintaining clarity, flexibility and usability.
 
 **Step 1**: Check requirements
 
-* Python 2.7+ or 3.4+
+* Python 2.7+ or 3.4+ with [pip](https://pip.pypa.io)
 * Bash, Zsh or Fish with tab-completion enabled
 
-**Step 2**: Install using [pip](https://pip.pypa.io) 
-(respects [virtualenv](https://virtualenv.readthedocs.org)):
+**Step 2**: Install the package:
 ```bash
 ~$ pip install dtags
 ```
@@ -68,8 +67,8 @@ Tag directories with `tag`:
 ```bash
 # Usage: tag <dir> [<tag>...]
 
-~$ tag ~/app            # add tag 'app' to ~/app
 ~$ tag ~/web dev work   # add tags 'dev' and 'work' to ~/web
+~$ tag ~/app            # tag ~/app with its basename, 'app'
 ```
 
 Un-tag directories with `untag`:
@@ -86,7 +85,7 @@ Change directories with `d` (meant to fully replace `cd`!):
 
 ~$ d                    # go to the user's home directory 
 ~$ d frontend           # go to the directory tagged 'frontend'
-~$ d many_dirs          # prompt the user to select the destination         
+~$ d many_dirs          # prompt for selection if tag maps to many directories         
 ~$ d ~/app              # go to ~/app
 ```
 
@@ -94,9 +93,13 @@ Execute commands in the directories with `e`:
 ```bash
 # Usage: e [-p] <targets> <command> [<arg>...]
 
-~$ e app ls             # execute 'ls' in directories tagged 'app'
-~$ e vm vagrant up      # execute 'vagrant up' in directories tagged 'vm'
-~$ e repo git pull      # execute 'git pull' in parallel
+~$ e repo git status    # execute 'git status' in directories tagged 'repo'
+~$ e vm vagrant halt    # execute 'vagrant halt' in directories tagged 'vm'
+~$ e -p vm git pull     # execute 'git pull' in directories tagged 'vm' in parallel
+~$ e ~/foo git status   # execute 'git status' in directory ~/foo
+~$ e '~/test dir' pwd   # execute 'pwd' in directory '~/test dir'
+~$ e app,vm ls          # execute 'ls' in directories tagged 'app' and/or 'vm'
+~$ e ~/foo,app pwd      # execute 'pwd' in ~/foo and directories tagged 'app'
 ```
 
 Display and manage tags with `dtags` (I like to have this aliased to `tags`):
