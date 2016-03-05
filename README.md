@@ -59,7 +59,8 @@ command -v dtags > /dev/null 2>&1; and dtags shell fish | source
 
 
 Once installed, you will have **5** commands at your disposal: `tag`, `untag`, 
-`d`, `e` and `dtags`.
+`d`, `e` and `dtags`. Please make sure you don't have any linux aliases, 
+functions or symlinks with the same names.
 
 ## Usage Examples
 
@@ -106,14 +107,23 @@ You can always use the `--help` option to find out more!
 ## Technical Notes
 
 * Windows is currently not supported
-* `e -p` hangs on interactive commands that wait on input (no way around this)
+* The directory-to-tags mapping is saved in `~/.dtags/mapping`
+* Tags are also saved on their own in `~/.dtags/tags` (used for tab-completion)
+* `e -p` hangs on interactive commands that wait on input (no easy way around this)
 * `e -p` spawns child processes and redirects their output to temporary files and then to stdout
 * `e -p` sends *sigterm* to its child processes when killed
 * `e` uses environment variable $SHELL to guess which shell is in use
-* `e` redirects all stderr to stdout
+* `e` redirects all stderr to stdout and should always return an exit status of 0
 * `e` executes the commands using *interactive shell*, which has pros and cons:
-    * the user gains access to linux functions and aliases
-    * the shell runtime config is "sourced" before the command is run
-    * the performance of `e` is then affected by the shell startup time (beware oh-my-zsh users)
-    * any errors thrown during the "sourcing" will show up in the output
+    * `e` can properly use linux functions and aliases
+    * The shell runtime configuration must be "sourced" each time the command is run
+    * The performance of `e` is affected by the shell startup time (beware oh-my-zsh users)
+    * Any errors thrown during the "sourcing" will show up in the output of `e`
 * `dtags edit` uses environment variable $EDITOR
+* `d` uses `grep -E`, `cut`, `seq` and `/dev/null` underneath the hood
+* `d` expects `~/.dtags/mapping` to be correctly formatted:
+    *  Please refrain from editing `~/.dtags/mapping` directly
+    *  Instead, use `dtags edit` which does the validation and formatting for you
+* Tab-completion expects `~/.dtags/tags` to be correctly formatted:
+    * Don't touch this file at all if possible
+    * If this is deleted, it is auto-generated the next time a dtags command is run.
