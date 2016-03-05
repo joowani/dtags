@@ -106,8 +106,14 @@ You can always use the `--help` option to find out more!
 ## Technical Notes
 
 * Windows is currently not supported
-* `e -p` hangs on interactive commands that wait on input
+* `e -p` hangs on interactive commands that wait on input (no way around this)
+* `e -p` spawns child processes and redirects their output to temporary files and then to stdout
 * `e -p` sends *sigterm* to its child processes when killed
-* `e` is affected by shell startup times (beware *oh-my-zsh* users)
 * `e` uses environment variable $SHELL to guess which shell is in use
+* `e` redirects all stderr to stdout
+* `e` executes the commands using *interactive shell*, which has pros and cons:
+    * the user gains access to linux functions and aliases
+    * the shell runtime config is "sourced" before the command is run
+    * the performance of `e` is then affected by the shell startup time (beware oh-my-zsh users)
+    * any errors thrown during the "sourcing" will show up in the output
 * `dtags edit` uses environment variable $EDITOR
