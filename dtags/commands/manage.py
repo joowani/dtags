@@ -58,7 +58,12 @@ def _edit(args):
     if args:
         abort(USAGE + 'Too many arguments')
     try:
-        with TempFile(delete=False, prefix='mapping.', dir=CFG_DIR) as tfile:
+        with TempFile(
+                mode='w+t',
+                delete=False,
+                prefix='mapping.',
+                dir=CFG_DIR
+        ) as tfile:
             with io.open(MAPPING_FILE, 'rt') as mapping_file:
                 tfile.write(EDIT_HELP_COMMENTS + mapping_file.read())
             tfile.flush()
