@@ -48,7 +48,7 @@ command -v dtags > /dev/null 2>&1; and dtags shell fish | source
 
 **Step 4**. Restart your shell.
 
-    Note for those are already using v1.x.x:
+    Note for those who are already using v1.x.x:
       dtags v2 has config changes that are not backwards-compatible.
       If you want to upgrade from v1, you need to run a migration script:
       
@@ -86,17 +86,14 @@ Change directories with `d` (designed to fully replace `cd`!):
 Execute commands in one or more directories with `e`:
 ```bash
 ~$ e repo git status    # execute 'git status' in directories tagged 'repo'
-~$ e vm vagrant halt    # execute 'vagrant halt' in directories tagged 'vm'
+~$ e ~/vm vagrant halt  # execute 'vagrant halt' in directory ~/vm
 ~$ e -p vm git pull     # execute 'git pull' in directories tagged 'vm' in parallel
-~$ e ~/foo git status   # execute 'git status' in directory ~/foo
-~$ e '~/test dir' pwd   # execute 'pwd' in directory '~/test dir'
-~$ e app,vm ls          # execute 'ls' in directories tagged 'app' and/or 'vm'
-~$ e ~/foo,app pwd      # execute 'pwd' in ~/foo and directories tagged 'app'
+~$ e vm,~/foo ls        # execute 'ls' in directories tagged 'vm' and ~/foo
 ```
 
 Search and manage tags with `dtags`:
 ```bash
-~$ dtags list				    # display directories-to-tags mapping
+~$ dtags list		    # display directories-to-tags mapping
 ~$ dtags list ~/app     # display the tags and directories associated with ~/app
 ~$ dtags list foo bar   # display the tags and directories associated with 'foo' or 'bar'
 ~$ dtags reverse        # display tags-to-directories mapping
