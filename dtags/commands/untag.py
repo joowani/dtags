@@ -26,7 +26,6 @@ target directory are removed."""
 
 def main():
     atexit.register(close_stdio)
-    # http://stackoverflow.com/questions/14207708
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
     mapping, excluded = load_mapping()
     args = sys.argv[1:]

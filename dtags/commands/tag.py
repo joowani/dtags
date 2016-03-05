@@ -27,7 +27,6 @@ the basename of the directory path is used instead."""
 
 def main():
     atexit.register(close_stdio)
-    # http://stackoverflow.com/questions/14207708
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
     args = sys.argv[1:]
     if not args:
