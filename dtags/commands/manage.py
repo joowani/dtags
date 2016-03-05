@@ -3,6 +3,7 @@ from __future__ import unicode_literals, print_function
 import os
 import io
 import sys
+import shlex
 import atexit
 import signal
 import subprocess as sp
@@ -70,11 +71,11 @@ def _edit(args):
     except (OSError, IOError) as err:
         abort('Failed to edit config: {}'.format(err), err.errno)
     else:
-        editor = os.environ.get('EDITOR')
+        editor = shlex.split(os.environ.get('EDITOR'))
         if not editor:
             abort('Undefined environment variable: ' + style.bad('EDITOR'))
         try:
-            sp.check_call([editor, tfile.name])
+            sp.check_call(editor + [tfile.name])
         except sp.CalledProcessError as err:
             abort('Failed to edit config: {}'.format(err.message))
         else:
