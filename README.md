@@ -34,7 +34,7 @@ All commands come with tab-completion.
 ~$ pip install --upgrade dtags
 ```
 
-**Step 3**: Modify your shell runtime configuration:
+**Step 3**: Add a line to your shell runtime configuration:
 ```bash
 # For zsh, place in ~/.zshrc:
 command -v dtags > /dev/null 2>&1 && . <(dtags shell zsh)
@@ -59,8 +59,8 @@ command -v dtags > /dev/null 2>&1; and dtags shell fish | source
 
 
 Once installed, you will have **5** commands at your disposal: `tag`, `untag`, 
-`d`, `e` and `dtags`. Please make sure you don't have any linux aliases, 
-functions or symlinks with the same names.
+`d`, `e` and `dtags`. Make sure you don't have any linux aliases, functions or 
+symlinks etc. with the same names.
 
 ## Usage Examples
 
