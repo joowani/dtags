@@ -94,10 +94,10 @@ Execute commands in one or more directories with `e`:
 
 Search and manage tags with `dtags`:
 ```bash
-~$ dtags list		    # display directories-to-tags mapping
+~$ dtags list 		    # display the directories-to-tags mapping
 ~$ dtags list ~/app     # display the tags and directories associated with ~/app
 ~$ dtags list foo bar   # display the tags and directories associated with 'foo' or 'bar'
-~$ dtags reverse        # display tags-to-directories mapping
+~$ dtags reverse        # display the tags-to-directories mapping
 ~$ dtags edit           # edit tags and directories via editor like vim
 ~$ dtags clean          # remove invalid or stale tags and directories
 ```
