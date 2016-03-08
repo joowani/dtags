@@ -15,9 +15,6 @@ any of these questions, then **dtags** may be for you!
 * Change directories quickly using the tag names
 * Automate command executions in multiple directories
 
-The goal is to save the user as many keystrokes as possible while maintaining 
-clarity, flexibility and usability. 
-
 All commands come with tab-completion.
 
 ## Installation
@@ -34,7 +31,7 @@ All commands come with tab-completion.
 ~$ pip install --upgrade dtags
 ```
 
-**Step 3**: Add a line to your shell runtime configuration:
+**Step 3**: Add the following line to your shell runtime configuration:
 ```bash
 # For zsh, place in ~/.zshrc:
 command -v dtags > /dev/null 2>&1 && . <(dtags shell zsh)
@@ -48,14 +45,14 @@ command -v dtags > /dev/null 2>&1; and dtags shell fish | source
 
 **Step 4**. Restart your shell.
 
-    Note for those who are already using v1.x.x:
+    Note for those who are upgrading from v1.x.x:
       dtags v2 has config changes that are not backwards-compatible.
-      If you want to upgrade from v1, you need to run a migration script:
+      If you want to keep your tags, you need to run a migration script:
       
        ~$ git clone https://github.com/joowani/dtags.git
        ~$ python dtags/scripts/migrate.py
        
-      If you don't mind losing your tags, simply run 'rm -rf ~/.dtags' instead.
+      If you don't mind losing them, simply run 'rm -rf ~/.dtags' instead.
 
 
 Once installed, you will have **5** commands at your disposal: `tag`, `untag`, 
@@ -108,7 +105,7 @@ You can always use the `--help` option to find out more!
 
 * Windows is currently not supported
 * The directory-to-tags mapping is saved in `~/.dtags/mapping`
-* Tags are also saved on their own in `~/.dtags/tags` (used for tab-completion)
+* Tags are also saved on their own in `~/.dtags/tags` for tab-completion
 * `e -p` hangs on interactive commands that wait on input (no easy way around this)
 * `e -p` spawns child processes and redirects their output to temporary files and then to stdout
 * `e -p` sends *sigterm* to its child processes when killed
