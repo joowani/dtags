@@ -1,5 +1,3 @@
-# DTags - Directory Tags for Lazy Programmers. 
-
 ## Introduction
 
 Do you have too many git repositories or vagrant machines to manage? Does your 
