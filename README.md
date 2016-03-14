@@ -2,15 +2,15 @@
 
 Do you have too many git repositories or vagrant machines to manage? Does your 
 work require you to switch between the same directories over and over? Are you 
-a lazy programmer who is always looking for shortcuts? If you answered *yes* to
-any of these questions, then **dtags** may be for you!
+a lazy programmer who is always looking ways to type less? If you answered *yes* 
+to any of these questions, then **dtags** may be for you!
 
 ## Features
 
 **dtags** is a lightweight command line tool which lets you:
 
 * Tag and un-tag directories
-* Change directories quickly using the tag names
+* Change directories quickly using the tags
 * Automate command executions in multiple directories
 
 All commands come with tab-completion.
@@ -30,16 +30,19 @@ All commands come with tab-completion.
 ```
 
 **Step 3**: Add the following line to your shell runtime configuration:
+
 ```bash
 # For zsh, place in ~/.zshrc:
-command -v dtags > /dev/null 2>&1 && . <(dtags shell zsh)
+command -v dtags > /dev/null 2>&1 && eval "`dtags shell zsh`"
 
 # For bash, place in ~/.bashrc (or ~/.bash_profile for OS X):
-command -v dtags > /dev/null 2>&1 && . <(dtags shell bash)
+command -v dtags > /dev/null 2>&1 && eval "`dtags shell bash`"
 
 # For fish, place in ~/.config/fish/config.fish:
 command -v dtags > /dev/null 2>&1; and dtags shell fish | source
 ```
+If `. <(dtags shell 
+
 
 **Step 4**. Restart your shell.
 
