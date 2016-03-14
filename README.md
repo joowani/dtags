@@ -41,8 +41,6 @@ command -v dtags > /dev/null 2>&1 && eval "`dtags shell bash`"
 # For fish, place in ~/.config/fish/config.fish:
 command -v dtags > /dev/null 2>&1; and dtags shell fish | source
 ```
-If `. <(dtags shell 
-
 
 **Step 4**. Restart your shell.
 
