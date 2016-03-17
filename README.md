@@ -10,8 +10,8 @@ to any of these questions, then **dtags** may be for you!
 **dtags** is a lightweight command line tool which lets you:
 
 * Tag and un-tag directories
-* Change directories quickly using the tags
-* Automate command executions in multiple directories
+* Change directories quickly via tags
+* Execute commands in multiple directories at the same time 
 
 All commands come with tab-completion.
 
@@ -108,14 +108,14 @@ You can always use the `--help` option to find out more!
 * `e -p` hangs on interactive commands that wait on input (no easy way around this)
 * `e -p` spawns child processes and redirects their output to temporary files and then to stdout
 * `e -p` sends *sigterm* to its child processes when killed
-* `e` uses environment variable $SHELL to guess which shell is in use
+* `e` uses environment variable **$SHELL** to guess which shell is in use
 * `e` redirects all stderr to stdout and should always return an exit status of 0
 * `e` executes the commands using *interactive shell*, which has pros and cons:
     * `e` can properly use linux functions and aliases
     * The shell runtime configuration must be "sourced" each time the command is run
     * The performance of `e` is affected by the shell startup time (beware oh-my-zsh users)
     * Any errors thrown during the "sourcing" will show up in the output of `e`
-* `dtags edit` uses environment variable $EDITOR
+* `dtags edit` uses environment variable **$EDITOR**
 * `d` uses `grep -E`, `cut`, `seq` and `/dev/null` underneath the hood
 * `d` expects `~/.dtags/mapping` to be correctly formatted:
     *  Please refrain from editing `~/.dtags/mapping` directly
