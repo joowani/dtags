@@ -193,7 +193,7 @@ def test_d():
     assert run('d /tmp bad') == d.USAGE + 'Too many arguments\n'
 
     # Test changing directories
-    d_msg = 'Going to {loc}...\n{loc}\n'
+    d_msg = 'Going to {loc}\n{loc}\n'
     assert run('d; pwd') == d_msg.format(loc=home)
     assert run('d home; pwd') == d_msg.format(loc=home)
     assert run('d tmp; pwd') == d_msg.format(loc='/tmp')
