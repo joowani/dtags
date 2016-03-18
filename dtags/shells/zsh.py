@@ -44,9 +44,10 @@ d() {{
         return 2
     fi
     declare -a _dtags_dirs
+
     PREV_IFS=$IFS
     IFS=$'\n'
-    _dtags_dirs=($(grep -E ",$1(,|$)" {mapping_file} | cut -d',' -f1))
+    _dtags_dirs=($(grep -F ,$1, {mapping_file} | cut -d',' -f1))
     IFS=$PREV_IFS
     declare _dtags_count=${{#_dtags_dirs[@]}}
 

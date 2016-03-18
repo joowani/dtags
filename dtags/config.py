@@ -39,10 +39,11 @@ def parse_mapping(filename):
     # Parse the file line by line
     with io.open(filename, mode='rt') as mapping_file:
         for line in mapping_file.readlines():
-            words = [
-                word.strip() for word in line.split(',')
-                if not word.isspace()
-            ]
+            words = []
+            for word in line.split(','):
+                word = word.strip()
+                if word:
+                    words.append(word)
             # Skip empty lines or comments
             if not words or words[0].startswith('#'):
                 continue
@@ -165,7 +166,7 @@ def save_mapping(mapping):
     try:
         with io.open(temp_mapping_file.name, 'wt') as temp_mapping_file:
             temp_mapping_file.write('\n'.join(
-                path + ',' + ','.join(sorted(reverse_mapping[path]))
+                path + ',' + ','.join(sorted(reverse_mapping[path])) + ','
                 for path in sorted(reverse_mapping)
             ))
             temp_mapping_file.flush()
