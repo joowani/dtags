@@ -7,7 +7,7 @@ version = {}
 with open('./dtags/version.py') as fp:
     exec(fp.read(), version)
 
-with open('./README.md') as fp:
+with open('./README.rst') as fp:
     description = fp.read()
 
 

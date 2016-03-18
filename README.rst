@@ -3,8 +3,8 @@ Introduction
 
 Do you have too many git repositories or vagrant machines to manage?
 Does your work require you to switch between the same directories over
-and over? Are you a lazy programmer who is always looking ways to type
-less? If you answered *yes* to any of these questions, then **dtags**
+and over? Are you a lazy programmer who is always looking for ways to 
+type less? If you answered *yes* to any of these questions, then **dtags**
 may be for you!
 
 Features
