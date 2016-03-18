@@ -11,7 +11,7 @@ to any of these questions, then **dtags** may be for you!
 
 * Tag and un-tag directories
 * Change directories quickly via tags
-* Execute commands in multiple directories at the same time 
+* Execute commands in multiple directories at once
 
 All commands come with tab-completion.
 
@@ -116,7 +116,7 @@ You can always use the `--help` option to find out more!
     * The performance of `e` is affected by the shell startup time (beware oh-my-zsh users)
     * Any errors thrown during the "sourcing" will show up in the output of `e`
 * `dtags edit` uses environment variable **$EDITOR**
-* `d` uses `grep -E`, `cut`, `seq` and `/dev/null` underneath the hood
+* `d` requires `grep`, `cut`, `seq` and `/dev/null`
 * `d` expects `~/.dtags/mapping` to be correctly formatted:
     *  Please refrain from editing `~/.dtags/mapping` directly
     *  Instead, use `dtags edit` which does the validation and formatting for you

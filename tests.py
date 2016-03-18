@@ -1,5 +1,7 @@
 """Test all dtags commands
 
+This is for internal development testing only.
+
 Things that must be tested manually:
 
 1. Run 'dtags edit'

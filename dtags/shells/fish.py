@@ -37,7 +37,7 @@ function d
         printf "%sToo many arguments\n" "$_dtags_usage"
         return 2
     end
-    set _dtags_dirs (grep -E ",$argv[1](,|\$)" {mapping_file} | cut -d',' -f1)
+    set _dtags_dirs (grep -F ,$argv[1], {mapping_file} | cut -d',' -f1)
     set -g _dtags_count (count $_dtags_dirs)
     if math "$_dtags_count == 0" > /dev/null
         if test -d $argv[1]

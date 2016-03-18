@@ -31,7 +31,7 @@ if __name__ == '__main__':
             with open(temp_mapping_file, 'w') as open_file:
                 open_file.write('\n'.join(
                     ','.join([os.path.abspath(os.path.expanduser(path))] +
-                    [t[1:] for t in sorted(rmapping[path])])
+                    [t[1:] for t in sorted(rmapping[path])] + [''])
                     for path in sorted(rmapping)
                 ))
         except (IOError, OSError) as e:
