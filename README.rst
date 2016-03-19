@@ -1,12 +1,3 @@
-Introduction
-============
-
-Do you have too many git repositories or vagrant machines to manage?
-Does your work require you to switch between the same directories over
-and over? Are you a lazy programmer who is always looking for ways to 
-type less? If you answered *yes* to any of these questions, then **dtags**
-may be for you!
-
 Features
 ========
 
@@ -14,9 +5,10 @@ Features
 
 -  Tag and un-tag directories
 -  Change directories quickly via tags
--  Execute commands in multiple directories at once
+-  Execute commands in tagged directories at the same time
+-  Easily manage multiple git repositories, vagrant machines etc.
 
-All commands come with tab-completion.
+All commands associated with dtags come with tab-completion.
 
 Installation
 ============
@@ -52,6 +44,7 @@ Installation
 ::
 
     Note for those who are upgrading from v1.x.x:
+    
       dtags v2 has config changes that are not backwards-compatible.
       If you want to keep your tags, you need to run a migration script:
       
