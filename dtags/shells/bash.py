@@ -1,4 +1,4 @@
-D_COMMAND = """
+CONFIGURATION = """
 d() {{
     declare _dtags_usage="{usage}"
     declare _dtags_version="{version}"

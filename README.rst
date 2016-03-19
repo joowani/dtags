@@ -1,12 +1,3 @@
-Introduction
-============
-
-Do you have too many git repositories or vagrant machines to manage?
-Does your work require you to switch between the same directories over
-and over? Are you a lazy programmer who is always looking for ways to 
-type less? If you answered *yes* to any of these questions, then **dtags**
-may be for you!
-
 Features
 ========
 
@@ -14,14 +5,17 @@ Features
 
 -  Tag and un-tag directories
 -  Change directories quickly via tags
--  Execute commands in multiple directories at once
+-  Execute commands in tagged directories at the same time
+-  Easily manage multiple git repositories, vagrant machines etc.
 
 All commands come with tab-completion.
+
+.. image:: example.gif
 
 Installation
 ============
 
-**Step 1**: Check requirements
+**Step 1**: Check requirements:
 
 -  Python 2.7+ or 3.4+
 -  Recent version of `pip <https://pip.pypa.io>`__
@@ -52,6 +46,7 @@ Installation
 ::
 
     Note for those who are upgrading from v1.x.x:
+    
       dtags v2 has config changes that are not backwards-compatible.
       If you want to keep your tags, you need to run a migration script:
       
@@ -103,14 +98,14 @@ Search and manage tags with ``dtags``:
 
 .. code:: bash
 
-    ~$ dtags list           # display the directories-to-tags mapping
-    ~$ dtags list ~/app     # display the tags and directories associated with ~/app
+    ~$ dtags                # display the directories-to-tags mapping
+    ~$ dtags list ~ ~/vm    # display the tags and directories associated with ~ and ~/app
     ~$ dtags list foo bar   # display the tags and directories associated with 'foo' or 'bar'
     ~$ dtags reverse        # display the tags-to-directories mapping
     ~$ dtags edit           # edit tags and directories via editor like vim
     ~$ dtags clean          # remove invalid or stale tags and directories
 
-You can always use the ``--help`` option to find out more!
+You can always use the ``--help`` option to find out more about each command!
 
 Technical Notes
 ===============
