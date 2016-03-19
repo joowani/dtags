@@ -13,7 +13,7 @@ All commands associated with dtags come with tab-completion.
 Installation
 ============
 
-**Step 1**: Check requirements
+**Step 1**: Check requirements:
 
 -  Python 2.7+ or 3.4+
 -  Recent version of `pip <https://pip.pypa.io>`__
@@ -103,7 +103,7 @@ Search and manage tags with ``dtags``:
     ~$ dtags edit           # edit tags and directories via editor like vim
     ~$ dtags clean          # remove invalid or stale tags and directories
 
-You can always use the ``--help`` option to find out more!
+You can always use the ``--help`` option to find out more about each command!
 
 Technical Notes
 ===============
