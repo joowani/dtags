@@ -8,7 +8,7 @@ Features
 -  Execute commands in tagged directories at the same time
 -  Easily manage multiple git repositories, vagrant machines etc.
 
-All commands associated with dtags come with tab-completion.
+All commands come with tab-completion.
 
 Installation
 ============
@@ -96,8 +96,8 @@ Search and manage tags with ``dtags``:
 
 .. code:: bash
 
-    ~$ dtags list           # display the directories-to-tags mapping
-    ~$ dtags list ~/app     # display the tags and directories associated with ~/app
+    ~$ dtags                # display the directories-to-tags mapping
+    ~$ dtags list ~ ~/vm    # display the tags and directories associated with ~ and ~/app
     ~$ dtags list foo bar   # display the tags and directories associated with 'foo' or 'bar'
     ~$ dtags reverse        # display the tags-to-directories mapping
     ~$ dtags edit           # edit tags and directories via editor like vim
