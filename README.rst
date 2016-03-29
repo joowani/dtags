@@ -10,6 +10,8 @@ Features
 
 All commands come with tab-completion.
 
+.. image:: example.gif
+
 Installation
 ============
 
