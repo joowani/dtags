@@ -1,5 +1,6 @@
 CONFIGURATION = """
-d() {{
+unalias d &> /dev/null
+function d() {{
     declare _dtags_usage='{usage}'
     declare _dtags_version='{version}'
     declare _dtags_description='{description}'
