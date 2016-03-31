@@ -35,6 +35,11 @@ function d() {{
     then
         printf "Version $_dtags_version\n"
         return 0
+    elif [[ $1 = - ]]
+    then
+        printf "$_dtags_goto_msg" "$OLDPWD"
+        cd "$OLDPWD"
+        return 0
     elif [[ $1 = -* ]]
     then
         printf "$_dtags_arg_err" "$_dtags_usage" "$1"
