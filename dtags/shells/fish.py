@@ -4,7 +4,6 @@ function d
     set _dtags_version "{version}"
     set _dtags_description "{description}"
     if isatty 1
-        set _dtags_goto_msg "{goto_msg_tty}"
         set _dtags_arg_err "{arg_err_tty}"
         set _dtags_dest_err "{dest_err_tty}"
         set _dtags_input_err "{input_err_tty}"
@@ -12,7 +11,6 @@ function d
         set _dtags_choice "{choice_tty}"
         set -g _dtags_prompt "{prompt_tty}"
     else
-        set _dtags_goto_msg "{goto_msg}"
         set _dtags_arg_err "{arg_err}"
         set _dtags_dest_err "{dest_err}"
         set _dtags_input_err "{input_err}"
@@ -21,7 +19,6 @@ function d
         set -g _dtags_prompt "{prompt}"
     end
     if math "1 >" (count $argv) > /dev/null
-        printf "$_dtags_goto_msg" "$HOME"
         cd $HOME
         return 0
     else if [ $argv[1] = "--help" ]
@@ -29,6 +26,9 @@ function d
         return 0
     else if [ $argv[1] = "--version" ]
         printf "Version %s\n" "$_dtags_version"
+        return 0
+    else if [ $argv[1] = "-" ]
+        cd "$OLDPWD"
         return 0
     else if echo "$argv[1]" | grep -q -E '^-' > /dev/null
         printf "$_dtags_arg_err" "$_dtags_usage" "$argv[1]"
@@ -67,7 +67,6 @@ function d
         set _dtags_dir $_dtags_dirs[$_dtags_idx]
     end
     if test -d $_dtags_dir
-        printf "$_dtags_goto_msg" "$_dtags_dir"
         cd $_dtags_dir
         return 0
     else

@@ -194,9 +194,10 @@ def test_d():
 
     # Test changing directories
     d_msg = 'Going to {loc}\n{loc}\n'
-    assert run('d; pwd') == d_msg.format(loc=home)
-    assert run('d home; pwd') == d_msg.format(loc=home)
-    assert run('d tmp; pwd') == d_msg.format(loc='/tmp')
+    assert home in run('d; pwd')
+    assert home in run('d home; pwd')
+    assert '/tmp' in run('d tmp; pwd')
+    assert home in run('d -; pwd')
 
 
 @pytest.mark.fifth
