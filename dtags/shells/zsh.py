@@ -1,12 +1,12 @@
 CONFIGURATION = """
 unalias d &> /dev/null
+
 function d() {{
     declare _dtags_usage='{usage}'
     declare _dtags_version='{version}'
     declare _dtags_description='{description}'
     if [[ -t 1 ]]
     then
-        declare _dtags_goto_msg="{goto_msg_tty}"
         declare _dtags_arg_err="{arg_err_tty}"
         declare _dtags_dest_err="{dest_err_tty}"
         declare _dtags_input_err="{input_err_tty}"
@@ -14,7 +14,6 @@ function d() {{
         declare _dtags_prompt="{prompt_tty}"
         declare _dtags_choice="{choice_tty}"
     else
-        declare _dtags_goto_msg="{goto_msg}"
         declare _dtags_arg_err="{arg_err}"
         declare _dtags_dest_err="{dest_err}"
         declare _dtags_input_err="{input_err}"
@@ -24,7 +23,6 @@ function d() {{
     fi
     if [[ $# -lt 1 ]]
     then
-        printf "$_dtags_goto_msg" "$HOME"
         cd $HOME
         return 0
     elif [[ $1 = --help ]]
@@ -37,7 +35,6 @@ function d() {{
         return 0
     elif [[ $1 = - ]]
     then
-        printf "$_dtags_goto_msg" "$OLDPWD"
         cd "$OLDPWD"
         return 0
     elif [[ $1 = -* ]]
@@ -90,7 +87,6 @@ function d() {{
     fi
     if [[ -d $_dtags_dir ]]
     then
-        printf "$_dtags_goto_msg" "$_dtags_dir"
         cd "$_dtags_dir"
         return 0
     else

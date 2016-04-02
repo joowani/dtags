@@ -135,6 +135,8 @@ Technical Notes
       of ``e``
 
 -  ``dtags edit`` uses environment variable **$EDITOR**
+-  ``d`` prefers tags over subdirectories if there is a name conflict
+   -  To go to the subdirectory put a ``/`` after the directory name
 -  ``d`` requires ``grep``, ``cut``, ``seq`` and ``/dev/null``
 -  ``d`` expects ``~/.dtags/mapping`` to be correctly formatted:
 

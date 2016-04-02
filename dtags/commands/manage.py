@@ -96,6 +96,7 @@ def _clean(args):
         save_mapping(mapping)
         finish('Cleaned the following entries:\n' + excluded)
     else:
+        save_mapping(mapping)
         finish('Nothing to clean')
 
 
@@ -182,14 +183,12 @@ def _shell(args):
         version=VERSION,
         usage=directory.USAGE,
         description=directory.DESCRIPTION,
-        goto_msg_tty=directory.GOTO_MSG_TTY,
         arg_err_tty=directory.ARG_ERR_TTY,
         dest_err_tty=directory.DEST_ERR_TTY,
         input_err_tty=directory.INPUT_ERR_TTY,
         index_err_tty=directory.INDEX_ERR_TTY,
         prompt_tty=directory.PROMPT_TTY,
         choice_tty=directory.CHOICE_TTY,
-        goto_msg=directory.GOTO_MSG,
         arg_err=directory.ARG_ERR,
         dest_err=directory.DEST_ERR,
         input_err=directory.INPUT_ERR,
