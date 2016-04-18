@@ -142,3 +142,4 @@ Technical Notes
       command is run.
 -  For a shell variable to be created automatically, the tag name must
    not conflict with environment variable names 
+-  When shell variables are created hyphens are replaced with underscores
