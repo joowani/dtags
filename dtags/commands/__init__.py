@@ -271,6 +271,7 @@ def refresh():
         assign_string.format(tag, paths.pop())
         for tag, paths in mapping.items()
         if len(paths) == 1 and
+        '-' not in tag and
         tag not in os.environ and
         not get_invalid_tag_chars(tag)
     ))
