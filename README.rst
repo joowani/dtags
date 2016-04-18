@@ -26,7 +26,7 @@ Installation
     # You may need to sudo depending on your setup
     ~$ pip install --upgrade dtags
 
-**Step 3**: Add the following line to your shell runtime configuration:
+**Step 3**: Add the following line at the end of your shell runtime configuration:
 
 .. code:: bash
 
