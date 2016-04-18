@@ -110,7 +110,7 @@ Technical Notes
 -  The directory-to-tags mapping is stored in ``~/.dtags/mapping``
 -  Tags are also stored on their own in ``~/.dtags/tags`` for tab-completion
 -  ``e -p`` is currently not supported on Windows
--  ``e -p`` hangs on interactive commands that wait on input
+-  ``e -p`` cannot execute interactive commands that wait on input
 -  ``e -p`` spawns child processes and redirects their output to
    temporary files and then to stdout
 -  ``e -p`` sends *sigterm* to its child processes when killed
