@@ -126,7 +126,9 @@ Technical Notes
 
 -  ``dtags edit`` uses environment variable **$EDITOR**
 -  ``d`` prefers tags over subdirectories when there are name conflicts
+
    -  To go to the subdirectory, put a ``/`` after the directory name
+   
 -  ``d`` expects ``~/.dtags/mapping`` to be correctly formatted:
 
    -  Please refrain from editing ``~/.dtags/mapping`` directly
