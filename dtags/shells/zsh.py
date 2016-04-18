@@ -1,5 +1,29 @@
 CONFIGURATION = """
-unalias d &> /dev/null
+unalias dtags > /dev/null 2>&1
+unalias t > /dev/null 2>&1
+unalias u > /dev/null 2>&1
+unalias e > /dev/null 2>&1
+unalias d > /dev/null 2>&1
+
+function dtags() {{
+    dtags-manage $@
+    if [[ $1 = edit ]] || [[ $1 = clean ]]
+    then
+        eval "`dtags-refresh zsh`"
+    fi
+}}
+
+function t() {{
+    dtags-t $@ && eval "`dtags-refresh zsh`"
+}}
+
+function u() {{
+    dtags-u $@ && eval "`dtags-refresh zsh`"
+}}
+
+function e() {{
+    dtags-e $@
+}}
 
 function d() {{
     declare _dtags_usage='{usage}'
@@ -43,11 +67,10 @@ function d() {{
         return 2
     elif [[ $# -gt 1 ]]
     then
-        printf "%sToo many arguments\n" "$_dtags_usage"
+        printf "%sd: too many arguments\n" "$_dtags_usage"
         return 2
     fi
     declare -a _dtags_dirs
-
     PREV_IFS=$IFS
     IFS=$'\n'
     _dtags_dirs=($(grep -F ,$1, {mapping_file} | cut -d',' -f1))
@@ -95,19 +118,40 @@ function d() {{
     fi
 }}
 
-__dtags_d_command() {{
+_dtags() {{
     if [[ CURRENT -eq 2 ]]
     then
-        if [[ -f "{tags_file}" ]]
-        then
-            compadd -S '' `cat {tags_file}`
-        fi
+        compadd list reverse
+        compadd -S '' edit clean commands
+    elif [[ $words[2] = list || $words[2] = reverse ]]
+    then
+        [[ -f "{tags_file}" ]] && compadd -S '' `cat {tags_file}`
         _files -/
     fi
 }}
 
+_t() {{
+    if [[ CURRENT -eq 2 ]]
+    then
+        _files -/
+    elif [[ -f "{tags_file}" ]] && [[ ! $words[2] = -* ]]
+    then
+        compadd `cat {tags_file}`
+    fi
+}}
 
-__dtags_e_command() {{
+
+_u() {{
+    if [[ CURRENT -eq 2 ]]
+    then
+        _files -/
+    elif [[ -f "{tags_file}" ]] && [[ ! $words[2] = -* ]]
+    then
+        compadd `cat {tags_file}`
+    fi
+}}
+
+_e() {{
     if [[ CURRENT -eq 2 ]]
     then
         [[ -f "{tags_file}" ]] && compadd `cat {tags_file}`
@@ -123,32 +167,22 @@ __dtags_e_command() {{
     fi
 }}
 
-
-__dtags_tag_untag_commands() {{
+_d() {{
     if [[ CURRENT -eq 2 ]]
     then
-        _files -/
-    elif [[ -f "{tags_file}" ]] && [[ ! $words[2] = -* ]]
-    then
-        compadd `cat {tags_file}`
-    fi
-}}
-
-
-__dtags_main_command() {{
-    if [[ CURRENT -eq 2 ]]
-    then
-        compadd list reverse shell
-        compadd -S '' edit clean
-    elif [[ $words[2] = list || $words[2] = reverse ]]
-    then
-        [[ -f "{tags_file}" ]] && compadd -S '' `cat {tags_file}`
+        if [[ -f "{tags_file}" ]]
+        then
+            compadd -S '' `cat {tags_file}`
+        fi
         _files -/
     fi
 }}
 
-compdef __dtags_e_command e
-compdef __dtags_d_command d
-compdef __dtags_main_command dtags
-compdef __dtags_tag_untag_commands tag untag
+compdef _dtags dtags
+compdef _t t
+compdef _u u
+compdef _e e
+compdef _d d
+
+eval "`dtags-refresh zsh`"
 """

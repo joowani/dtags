@@ -10,18 +10,18 @@ from dtags.utils import close_stdio, finish, expand, abort
 from dtags.version import VERSION
 
 USAGE = """Usage:
-  untag <dir> [<tag>...]
-  untag --help
-  untag --version
+  u <dir> [<tag>...]
+  u --help
+  u --version
 """
 DESCRIPTION = """
 Arguments:
   dir     The directory path
   tag     The directory tag
 
-Remove one or more tags from the target directory.
-If no tag names are given, ALL tags mapped to the
-target directory are removed."""
+Untag the target directory. If no tag names are
+given, ALL tags mapped to the target directory
+are removed."""
 
 
 def main():
@@ -37,7 +37,7 @@ def main():
     elif head == '--version':
         finish('Version ' + VERSION)
     elif head.startswith('-'):
-        abort(USAGE + 'Invalid argument: ' + style.bad(head))
+        abort(USAGE + 'u: invalid argument: ' + style.bad(head))
     path = expand(head)
     tags_removed = set()
     for tag in tail if tail else mapping.keys():
