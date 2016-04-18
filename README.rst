@@ -115,8 +115,8 @@ Technical Notes
    temporary files and then to stdout
 -  ``e -p`` sends *sigterm* to its child processes when killed
 -  ``e`` uses environment variable **$SHELL** to guess which shell is in use
--  ``e`` redirects stderr to stdout and always return an exit status of 0
--  ``e`` uses *interactive shell*, which has pros and cons:
+-  ``e`` redirects stderr to stdout and always returns an exit status of 0
+-  ``e`` uses *interactive shell* and this has pros and cons:
 
    -  The user has access to all linux functions and aliases
    -  The shell runtime configuration must be "sourced" each execution
@@ -131,7 +131,7 @@ Technical Notes
    
 -  ``d`` expects ``~/.dtags/mapping`` to be correctly formatted:
 
-   -  Please refrain from editing ``~/.dtags/mapping`` directly
+   -  Please refrain from editing ``~/.dtags/mapping`` directly.
    -  Instead, use ``dtags edit`` which does the validation and
       formatting for you
 
