@@ -85,9 +85,9 @@ Display, search and manage tags with ``dtags``:
 .. code:: bash
 
     ~$ dtags                # display the directories-to-tags mapping
-    ~$ dtags list ~ ~/vm    # display the tags and directories associated with ~ and ~/app
+    ~$ dtags list ~ ~/vm    # display the tags and directories associated with ~ and ~/vm
     ~$ dtags list foo bar   # display the tags and directories associated with 'foo' or 'bar'
-    ~$ dtags reverse        # display the tags-to-directories mapping
+    ~$ dtags reverse        # display the tags-to-directories (reverse) mapping
     ~$ dtags edit           # edit tags and directories via editor like vim
     ~$ dtags clean          # remove invalid or stale tags and directories
     ~$ dtags commands       # display all available dtags commands (e.g. t, u, d, e)
