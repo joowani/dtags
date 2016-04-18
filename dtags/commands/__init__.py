@@ -268,11 +268,10 @@ def refresh():
     assign_string = 'set -g {} "{}"' if shell_name == 'fish' else '{}="{}"'
     mapping, _ = load_mapping()
     print('\n'.join(
-        assign_string.format(tag, paths.pop())
+        assign_string.format(tag.replace('-', '_'), paths.pop())
         for tag, paths in mapping.items()
         if len(paths) == 1 and
-        '-' not in tag and
-        tag not in os.environ and
+        tag.replace('-', '_') not in os.environ and
         not get_invalid_tag_chars(tag)
     ))
 
