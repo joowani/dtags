@@ -1,12 +1,11 @@
-"""Test all dtags commands
-
-This is for internal development testing only.
+"""This is for internal development testing only!!!
 
 Things that must be tested manually:
 
 1. Run 'dtags edit'
 2. Run 'd tag-with-many-dirs'
 3. Kill 'e -p' and make sure child processes are dead
+4. Shell variables
 """
 
 from __future__ import unicode_literals
@@ -21,17 +20,17 @@ import pytest
 from dtags import CFG_DIR, MAPPING_FILE
 from dtags.chars import TAG_CHARS
 from dtags.version import VERSION
+from dtags.commands import d, e, t, u
 from dtags.commands import (
-    directory as d,
-    execute as e,
-    manage as dt,
-    tag as tg,
-    untag as utg,
+    USAGE,
+    DESCRIPTION,
+    COMMANDS
 )
 
 generated_tags = set()
 tag_chars = list(TAG_CHARS)
 home = os.path.expanduser('~')
+current_shell = os.environ.get('SHELL', '')
 
 
 def setup_module(*_):
@@ -57,17 +56,25 @@ def run(command, shell=None):
         'stderr': subprocess.STDOUT,
         'preexec_fn': os.setsid
     }
+    valid_output_lines = []
     if shell is None:
-        shell = os.environ['SHELL']
+        shell = current_shell
     try:
         std_output = subprocess.check_output(
             '{} -i -c "{}"'.format(shell, command),
             **kwargs
         )
     except subprocess.CalledProcessError as err:
-        return err.output
+        for line in err.output.split('\n'):
+            if 'cannot set terminal' in line or 'no job control' in line:
+                continue
+            valid_output_lines.append(line)
     else:
-        return std_output
+        for line in std_output.split('\n'):
+            if 'cannot set terminal' in line or 'no job control' in line:
+                continue
+            valid_output_lines.append(line)
+    return '\n'.join(valid_output_lines)
 
 
 @pytest.mark.first
@@ -79,67 +86,69 @@ def test_init():
     assert run('dtags list test') == expected
     assert run('dtags reverse') == expected
     assert run('dtags reverse test') == expected
+    assert run('dtags commands') == COMMANDS + '\n'
     assert run('dtags clean') == 'Nothing to clean\n'
 
 
 @pytest.mark.second
-def test_tag():
+def test_t():
     """Test if 'tag' works as expected."""
     # Test argument handling
-    assert run('tag') == tg.USAGE + tg.DESCRIPTION + '\n'
-    assert run('tag --help') == tg.USAGE + tg.DESCRIPTION + '\n'
-    assert run('tag --version') == 'Version ' + VERSION + '\n'
-    assert run('tag -z') == tg.USAGE + 'Invalid argument: -z\n'
+    assert run('t') == t.USAGE + t.DESCRIPTION + '\n'
+    assert run('t --help') == t.USAGE + t.DESCRIPTION + '\n'
+    assert run('t --version') == 'Version ' + VERSION + '\n'
+    assert run('t -z') == t.USAGE + 't: invalid argument: -z\n'
 
     # Tag /usr/bin by basename
-    assert run('tag /usr/bin') == '/usr/bin +#bin\n'
+    assert run('t /usr/bin') == '/usr/bin +#bin\n'
     assert run('dtags') == '/usr/bin #bin\n'
-    assert run('tag /usr/bin') == 'Nothing to do\n'
+    assert run('t /usr/bin') == 'Nothing to do\n'
 
     # Tag /usr/bin foo
-    assert run('tag /usr/bin foo') == '/usr/bin +#foo\n'
+    assert run('t /usr/bin foo') == '/usr/bin +#foo\n'
     assert run('dtags') == '/usr/bin #bin #foo\n'
-    assert run('tag /usr/bin foo bin') == 'Nothing to do\n'
+    assert run('t /usr/bin foo bin') == 'Nothing to do\n'
 
     # Tag /usr/bin bar and baz
-    assert run('tag /usr/bin bar baz') == '/usr/bin +#bar +#baz\n'
+    assert run('t /usr/bin bar baz') == '/usr/bin +#bar +#baz\n'
     assert run('dtags') == '/usr/bin #bar #baz #bin #foo\n'
-    assert run('tag /usr/bin foo bar baz') == 'Nothing to do\n'
+    assert run('t /usr/bin foo bar baz') == 'Nothing to do\n'
 
     # Tag /tmp by basename
-    assert run('tag /tmp') == '/tmp +#tmp\n'
+    assert run('t /tmp') == '/tmp +#tmp\n'
     assert '/tmp #tmp' in run('dtags')
-    assert run('tag /tmp') == 'Nothing to do\n'
+    assert run('t /tmp') == 'Nothing to do\n'
 
     # Tag ~ foo
-    assert run('tag /tmp foo') == '/tmp +#foo\n'
+    assert run('t /tmp foo') == '/tmp +#foo\n'
     assert '/tmp #foo' in run('dtags')
-    assert run('tag /tmp foo tmp') == 'Nothing to do\n'
+    assert run('t /tmp foo tmp') == 'Nothing to do\n'
 
     # Tag ~ bar and baz
-    assert run('tag /tmp bar baz') == '/tmp +#bar +#baz\n'
+    assert run('t /tmp bar baz') == '/tmp +#bar +#baz\n'
     assert '/tmp #bar #baz #foo' in run('dtags')
-    assert run('tag /tmp bar baz foo') == 'Nothing to do\n'
+    assert run('t /tmp bar baz foo') == 'Nothing to do\n'
 
     # Test invalid arguments
-    assert run("tag ~ 'a b'") == 'Tag name a b contains whitespaces\n'
-    assert run('tag ~ b@d') == 'Tag name b@d contains bad characters @\n'
-    assert run('tag ~ @x') == 'Tag name @x does not start with an alphabet\n'
-    assert run('tag /@') == 'Directory path /@ contains bad characters @\n'
-    assert run('tag /invalid') == 'Invalid directory /invalid\n'
+    if 'zsh' in current_shell or 'fish' in current_shell:
+        assert run("t ~ 'a b'") == 't: tag name a b contains whitespaces\n'
+    assert run('t ~ b@d') == 't: tag name b@d contains bad characters @\n'
+    assert run('t ~ @x') == 't: tag name @x does not start with an alphabet\n'
+    assert run('t /@') == 't: directory path /@ contains bad characters @\n'
+    assert run('t /invalid') == 't: invalid directory: /invalid\n'
 
 
 @pytest.mark.third
 def test_dtags():
     """Test if 'dtags' works as expected."""
     # Test argument handling
-    assert run('dtags --help') == dt.USAGE + dt.DESCRIPTION + '\n'
+    assert run('dtags --help') == USAGE + DESCRIPTION + '\n'
     assert run('dtags --version') == 'Version ' + VERSION + '\n'
-    assert run('dtags -z') == dt.USAGE + 'Invalid argument: -z\n'
-    assert run('dtags list -z') == dt.USAGE + 'Invalid argument: -z\n'
-    assert run('dtags edit invalid') == dt.USAGE + 'Too many arguments\n'
-    assert run('dtags clean invalid') == dt.USAGE + 'Too many arguments\n'
-    assert run('dtags shell bash bad') == dt.USAGE + 'Too many arguments\n'
+    assert run('dtags -z') == USAGE + 'dtags: invalid argument: -z\n'
+    assert run('dtags list -z') == USAGE + 'dtags: invalid argument: -z\n'
+    assert run('dtags edit invalid') == USAGE + 'dtags: too many arguments\n'
+    assert run('dtags clean invalid') == USAGE + 'dtags: too many arguments\n'
+    assert run('dtags commands bad') == USAGE + 'dtags: too many arguments\n'
 
     # Test 'dtags list'
     assert run('dtags list') == run('dtags')
@@ -166,15 +175,17 @@ def test_dtags():
     assert run('dtags reverse /tmp') == '\n'.join([bar, baz, foo, tmp])
 
     # Test 'dtags shell'
-    assert '_dtags_dir=${_dtags_dirs[0]}' in run('dtags shell bash')
-    assert '_dtags_dir=${_dtags_dirs[1]}' in run('dtags shell zsh')
-    assert 'set _dtags_dir $_dtags_dirs[1]' in run('dtags shell fish')
-    assert run('dtags shell bad') == 'Unsupported shell: bad\n'
+    assert '_dtags_dir=${_dtags_dirs[0]}' in run('dtags-activate bash')
+    assert '_dtags_dir=${_dtags_dirs[1]}' in run('dtags-activate zsh')
+    assert 'set _dtags_dir $_dtags_dirs[1]' in run('dtags-activate fish')
+    assert run('dtags-activate bad') == 'dtags: unsupported shell: bad\n'
 
     # Test sourcing 'dtags shell' output
     # assert execute('source <(dtags shell bash)', shell='bash') == ''
-    assert run('source <(dtags shell zsh)', shell='zsh') == ''
-    assert run('dtags shell fish | source', shell='fish') == ''
+    if 'zsh' in current_shell:
+        assert run('. <(dtags-activate zsh)', shell='zsh') == ''
+    if 'fish' in current_shell:
+        assert run('dtags-activate fish | source', shell='fish') == ''
 
     # Test 'dtags clean' (safe version)
     assert run('dtags clean') == 'Nothing to clean\n'
@@ -184,16 +195,15 @@ def test_dtags():
 def test_d():
     """Test if the 'd' command works as expected."""
     # Tag home directory to test the 'd' command
-    assert run('tag ~ home') == '{} +#home\n'.format(home)
+    assert run('t ~ home') == '{} +#home\n'.format(home)
 
     # Test argument handling
     assert run('d --help') == d.USAGE + d.DESCRIPTION
     assert run('d --version') == 'Version ' + VERSION + '\n'
-    assert run('d -z') == d.USAGE + 'Invalid argument: -z\n'
-    assert run('d /tmp bad') == d.USAGE + 'Too many arguments\n'
+    assert run('d -z') == d.USAGE + 'd: invalid argument: -z\n'
+    assert run('d /tmp bad') == d.USAGE + 'd: too many arguments\n'
 
     # Test changing directories
-    d_msg = 'Going to {loc}\n{loc}\n'
     assert home in run('d; pwd')
     assert home in run('d home; pwd')
     assert '/tmp' in run('d tmp; pwd')
@@ -207,10 +217,10 @@ def test_e():
     assert run('e') == e.USAGE + e.DESCRIPTION + '\n'
     assert run('e --help') == e.USAGE + e.DESCRIPTION + '\n'
     assert run('e --version') == 'Version ' + VERSION + '\n'
-    assert run('e -z') == e.USAGE + 'Invalid argument: -z\n'
-    assert run('e -p') == e.USAGE + 'Missing argument: <targets>\n'
-    assert run('e test') == e.USAGE + 'Missing argument: <command>\n'
-    assert run('e -p test') == e.USAGE + 'Missing argument: <command>\n'
+    assert run('e -z') == e.USAGE + 'e: invalid argument: -z\n'
+    assert run('e -p') == e.USAGE + 'e: missing argument: <targets>\n'
+    assert run('e test') == e.USAGE + 'e: missing argument: <command>\n'
+    assert run('e -p test') == e.USAGE + 'e: missing argument: <command>\n'
 
     # Test executing commands
     s = 'Executing command pwd in sequence...\n\n'
@@ -249,37 +259,37 @@ def test_e():
 
 
 @pytest.mark.sixth
-def test_untag():
+def test_u():
     """Test if 'untag' works as expected."""
     # Test argument handling
-    assert run('untag') == utg.USAGE + utg.DESCRIPTION + '\n'
-    assert run('untag --help') == utg.USAGE + utg.DESCRIPTION + '\n'
-    assert run('untag --version') == 'Version ' + VERSION + '\n'
-    assert run('untag -z') == utg.USAGE + 'Invalid argument: -z\n'
+    assert run('u') == u.USAGE + u.DESCRIPTION + '\n'
+    assert run('u --help') == u.USAGE + u.DESCRIPTION + '\n'
+    assert run('u --version') == 'Version ' + VERSION + '\n'
+    assert run('u -z') == u.USAGE + 'u: invalid argument: -z\n'
 
     # Remove tag from home directory
-    assert run('untag ~') == '{} -#home\n'.format(home)
+    assert run('u ~') == '{} -#home\n'.format(home)
     assert home not in run('dtags list')
     assert home not in run('dtags reverse')
 
     # Remove tag foo from /usr/bin
-    assert run('untag /usr/bin foo') == '/usr/bin -#foo\n'
-    assert run('untag /usr/bin foo') == 'Nothing to do\n'
+    assert run('u /usr/bin foo') == '/usr/bin -#foo\n'
+    assert run('u /usr/bin foo') == 'Nothing to do\n'
     assert '/usr/bin' not in run('dtags list foo')
     assert 'foo' not in run('dtags list /usr/bin')
 
     # Remove tag bar and an unknown tag from /usr/bin
-    assert run('untag /usr/bin bar unknown') == '/usr/bin -#bar\n'
+    assert run('u /usr/bin bar unknown') == '/usr/bin -#bar\n'
     assert '/usr/bin' not in run('dtags list foo bar')
     assert 'bar' not in run('dtags list /usr/bin')
 
     # Remove the rest of the tags from /usr/bin
-    assert run('untag /usr/bin bin baz') == '/usr/bin -#baz -#bin\n'
+    assert run('u /usr/bin bin baz') == '/usr/bin -#baz -#bin\n'
     assert run('dtags list /usr/bin') == 'Nothing to list\n'
     assert '/usr/bin' not in run('dtags list foo bar baz')
 
     # Remove all tags from /tmp at once
-    assert run('untag /tmp') == '/tmp -#bar -#baz -#foo -#tmp\n'
+    assert run('u /tmp') == '/tmp -#bar -#baz -#foo -#tmp\n'
     assert run('dtags list /tmp') == 'Nothing to list\n'
     assert run('dtags list foo bar baz') == 'Nothing to list\n'
 
@@ -324,12 +334,12 @@ def test_bad_mapping():
     assert '{} #bar #baz #foo #home'.format(home) in output
 
     # Test 'tag'
-    output = run('tag /tmp')
+    output = run('t /tmp')
     for expected_error in expected_errors:
         assert expected_error in output
     assert 'Nothing to do' in output
     assert 'Cleaned the following invalid entries' in output
-    output = run('tag /tmp')
+    output = run('t /tmp')
     for expected_error in expected_errors:
         assert expected_error not in output
     assert 'Cleaned the following invalid entries' not in output
@@ -337,12 +347,12 @@ def test_bad_mapping():
     # Test 'untag'
     with io.open(MAPPING_FILE, "w+t") as open_file:
         open_file.write(test_mapping)
-    output = run('untag /tmp')
+    output = run('u /tmp')
     for expected_error in expected_errors:
         assert expected_error in output
     assert '/tmp -#bar -#baz -#foo -#tmp' in output
     assert 'Cleaned the following invalid entries' in output
-    output = run('untag /tmp')
+    output = run('u /tmp')
     for expected_error in expected_errors:
         assert expected_error not in output
     assert 'Cleaned the following invalid entries' not in output

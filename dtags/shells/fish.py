@@ -1,4 +1,26 @@
 CONFIGURATION = """
+functions -e dtags > /dev/null 2>&1
+functions -e t > /dev/null 2>&1
+functions -e u > /dev/null 2>&1
+functions -e e > /dev/null 2>&1
+functions -e d > /dev/null 2>&1
+
+function dtags
+    dtags-manage $argv; and dtags-refresh fish | source
+end
+
+function t
+    dtags-t $argv; and dtags-refresh fish | source
+end
+
+function u
+    dtags-u $argv; and dtags-refresh fish | source
+end
+
+function e
+    dtags-e $argv
+end
+
 function d
     set _dtags_usage "{usage}"
     set _dtags_version "{version}"
@@ -22,7 +44,7 @@ function d
         cd $HOME
         return 0
     else if [ $argv[1] = "--help" ]
-        printf "$_dtags_usage$_dtags_descriptions"
+        printf "$_dtags_usage$_dtags_description"
         return 0
     else if [ $argv[1] = "--version" ]
         printf "Version %s\n" "$_dtags_version"
@@ -34,7 +56,7 @@ function d
         printf "$_dtags_arg_err" "$_dtags_usage" "$argv[1]"
         return 2
     else if math "1 <" (count $argv) > /dev/null
-        printf "%sToo many arguments\n" "$_dtags_usage"
+        printf "%sd: too many arguments\n" "$_dtags_usage"
         return 2
     end
     set _dtags_dirs (grep -F ,$argv[1], {mapping_file} | cut -d',' -f1)
@@ -126,13 +148,16 @@ complete -f -c dtags -n '__dtags_no_args' \
     -a clean -d 'Remove invalid tags and directories'
 complete -f -c dtags -n '__dtags_no_args' \
     -a shell -d 'Print the shell runtime configuration'
+complete -f -c dtags -n '__dtags_no_args' \
+    -a commands -d 'List all available dtags commands'
 complete -f -c dtags -n '__dtags_has_first_arg list' \
     -a '(__dtags_tags)' -d 'Directory tag'
 complete -f -c dtags -n '__dtags_has_first_arg reverse' \
     -a '(__dtags_tags)' -d 'Directory tag'
-complete -f -c tag -n '__dtags_past_first_arg' \
+
+complete -f -c t -n '__dtags_past_first_arg' \
     -a '(__dtags_tags)' -d 'Directory tag'
-complete -f -c untag -n '__dtags_past_first_arg' \
+complete -f -c u -n '__dtags_past_first_arg' \
     -a '(__dtags_tags)' -d 'Directory tag'
 complete -f -c d -n '__dtags_no_args' \
     -a '(__dtags_tags)' -d 'Directory tag'
@@ -140,4 +165,6 @@ complete -f -c e -n '__dtags_no_args' \
     -a '(__dtags_tags)' -d 'Directory tag'
 complete -f -c e -n '__dtags_no_args' \
     -a -p -d 'Execute the commands in parallel'
+
+dtags-refresh fish | source
 """

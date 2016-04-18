@@ -22,18 +22,18 @@ If multiple directories are associated with
 the same tag, a selection menu is displayed.
 """
 
-ARG_ERR = '%sInvalid argument: %s\n'
+ARG_ERR = '%sd: invalid argument: %s\n'
 CHOICE = '%s: %s\n'
-DEST_ERR = '%sInvalid destination: %s\n'
-INDEX_ERR = 'Index out of range: %s\n'
-INPUT_ERR = 'Invalid input: %s\n'
+DEST_ERR = '%sd: invalid destination: %s\n'
+INDEX_ERR = 'd: index out of range: %s\n'
+INPUT_ERR = 'd: invalid input: %s\n'
 PROMPT = '\nSelect directory (1 - %s): '
 
 # Style the messages if the output is going to a terminal
 tty = True
-ARG_ERR_TTY = '%sInvalid argument: ' + style.bad('%s\n', tty=tty)
+ARG_ERR_TTY = '%sd: invalid argument: ' + style.bad('%s\n', tty=tty)
 CHOICE_TTY = style.msg('%s: ', tty=tty) + style.path('%s\n', tty=tty)
-DEST_ERR_TTY = '%sInvalid destination: ' + style.bad('%s\n', tty=tty)
-INDEX_ERR_TTY = 'Index out of range: ' + style.bad('%s\n', tty=tty)
-INPUT_ERR_TTY = 'Invalid input: ' + style.bad('%s\n', tty=tty)
+DEST_ERR_TTY = '%sd: invalid destination: ' + style.bad('%s\n', tty=tty)
+INDEX_ERR_TTY = 'd: index out of range: ' + style.bad('%s\n', tty=tty)
+INPUT_ERR_TTY = 'd: invalid input: ' + style.bad('%s\n', tty=tty)
 PROMPT_TTY = style.msg('\nSelect directory (1 - %s): ', tty=tty)

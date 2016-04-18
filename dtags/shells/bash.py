@@ -1,7 +1,31 @@
 CONFIGURATION = """
-unalias d &> /dev/null
+unalias dtags > /dev/null 2>&1
+unalias t > /dev/null 2>&1
+unalias u > /dev/null 2>&1
+unalias e > /dev/null 2>&1
+unalias d > /dev/null 2>&1
 
-d() {{
+function dtags() {{
+    dtags-manage $@
+    if [[ $1 = edit ]] || [[ $1 = clean ]]
+    then
+        eval "`dtags-refresh bash`"
+    fi
+}}
+
+function t() {{
+    dtags-t $@ && eval "`dtags-refresh bash`"
+}}
+
+function u() {{
+    dtags-u $@ && eval "`dtags-refresh bash`"
+}}
+
+function e() {{
+    dtags-e $@
+}}
+
+function d() {{
     declare _dtags_usage="{usage}"
     declare _dtags_version="{version}"
     declare _dtags_description="{description}"
@@ -43,7 +67,7 @@ d() {{
         return 2
     elif [[ $# -gt 1 ]]
     then
-        printf "%sToo many arguments\n" "$_dtags_usage"
+        printf "%sd: too many arguments\n" "$_dtags_usage"
         return 2
     fi
     declare -a _dtags_dirs
@@ -93,20 +117,44 @@ d() {{
     fi
 }}
 
-
-__dtags_d_command() {{
+_dtags() {{
     declare cur=${{COMP_WORDS[COMP_CWORD]}}
     if [[ ${{COMP_CWORD}} -eq 1 ]]
+    then
+        COMPREPLY+=($(compgen -W "list reverse shell edit clean commands" -- $cur))
+    elif [[ ${{COMP_WORDS[1]}} = list ]] || [[ ${{COMP_WORDS[1]}} = reverse ]]
     then
         if [[ -f "{tags_file}" ]]
         then
             COMPREPLY+=($(compgen -W "`cat {tags_file}`" -- $cur))
         fi
+        _filedir -d
     fi
 }}
 
+_t() {{
+    declare cur=${{COMP_WORDS[COMP_CWORD]}}
+    if [[ ${{COMP_CWORD}} -eq 1 ]]
+    then
+        _filedir -d
+    elif [[ -f "{tags_file}" ]] && [[ ! ${{COMP_WORDS[1]}} = -* ]]
+    then
+        COMPREPLY+=($(compgen -W "`cat {tags_file}`" -- $cur))
+    fi
+}}
 
-__dtags_e_command() {{
+_u() {{
+    declare cur=${{COMP_WORDS[COMP_CWORD]}}
+    if [[ ${{COMP_CWORD}} -eq 1 ]]
+    then
+        _filedir -d
+    elif [[ -f "{tags_file}" ]] && [[ ! ${{COMP_WORDS[1]}} = -* ]]
+    then
+        COMPREPLY+=($(compgen -W "`cat {tags_file}`" -- $cur))
+    fi
+}}
+
+_e() {{
     declare cur=${{COMP_WORDS[COMP_CWORD]}}
     if [[ ${{COMP_CWORD}} -eq 1 ]]
     then
@@ -124,36 +172,22 @@ __dtags_e_command() {{
     fi
 }}
 
-
-__dtags_tag_untag_commands() {{
+_d() {{
     declare cur=${{COMP_WORDS[COMP_CWORD]}}
     if [[ ${{COMP_CWORD}} -eq 1 ]]
-    then
-        _filedir -d
-    elif [[ -f "{tags_file}" ]] && [[ ! ${{COMP_WORDS[1]}} = -* ]]
-    then
-        COMPREPLY+=($(compgen -W "`cat {tags_file}`" -- $cur))
-    fi
-}}
-
-
-__dtags_main_command() {{
-    declare cur=${{COMP_WORDS[COMP_CWORD]}}
-    if [[ ${{COMP_CWORD}} -eq 1 ]]
-    then
-        COMPREPLY+=($(compgen -W "list reverse shell edit clean" -- $cur))
-    elif [[ ${{COMP_WORDS[1]}} = list ]] || [[ ${{COMP_WORDS[1]}} = reverse ]]
     then
         if [[ -f "{tags_file}" ]]
         then
             COMPREPLY+=($(compgen -W "`cat {tags_file}`" -- $cur))
         fi
-        _filedir -d
     fi
 }}
 
-complete -o dirnames -F __dtags_e_command e
-complete -o dirnames -F __dtags_d_command d
-complete -o dirnames -F __dtags_main_command dtags
-complete -o dirnames -F __dtags_tag_untag_commands tag untag
+complete -o dirnames -F _dtags dtags
+complete -o dirnames -F _t t
+complete -o dirnames -F _u u
+complete -o dirnames -F _e e
+complete -o dirnames -F _d d
+
+eval "`dtags-refresh bash`"
 """

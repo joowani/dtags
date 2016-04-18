@@ -90,16 +90,16 @@ def main():
     elif head == '--version':
         finish('Version ' + VERSION)
     elif head == '-p' and not tail:
-        abort(USAGE + 'Missing argument: ' + style.bad('<targets>'))
+        abort(USAGE + 'e: missing argument: ' + style.bad('<targets>'))
     elif head == '-p' and tail:
         parallel = True
         head, tail = tail[0], tail[1:]
     elif head.startswith('-'):
-        abort(USAGE + 'Invalid argument: ' + style.bad(head))
+        abort(USAGE + 'e: invalid argument: ' + style.bad(head))
 
     # Parse the positional arguments
     if not tail:
-        abort(USAGE + 'Missing argument: ' + style.bad('<command>'))
+        abort(USAGE + 'e: missing argument: ' + style.bad('<command>'))
     directories = collections.defaultdict(set)
     for target in head.split(','):
         if not target:
@@ -112,13 +112,13 @@ def main():
             if os.path.isdir(path):
                 directories[path].add(None)
             else:
-                abort(USAGE + 'Invalid target: ' + style.bad(target))
+                abort(USAGE + 'e: invalid target: ' + style.bad(target))
     command = sp.list2cmdline(tail)
 
     # Check which shell is in use (e.g. zsh, bash, fish)
     shell = os.environ.get('SHELL')
     if shell is None:
-        abort('Undefined environment variable: ' + style.bad('SHELL'))
+        abort('e: undefined environment variable: ' + style.bad('SHELL'))
 
     # Execute the command in the targeted directories
     msg_head = style.msg('Executing command ') + style.cmd(command)

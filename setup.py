@@ -13,19 +13,16 @@ with open('./README.rst') as fp:
 
 post_install_msg = """
 Finished installing dtags {version}.
-To complete the installation, place the following line in your shell config:
+To activate dtags, place the following line in your shell config:
 
   For zsh, place in ~/.zshrc:
-
-    command -v dtags > /dev/null 2>&1 && . <(dtags shell zsh)
+  command -v dtags-activate > /dev/null 2>&1 && eval "`dtags-activate zsh`"
 
   For bash, place in ~/.bashrc (or ~/.bash_profile for OS X):
-
-    command -v dtags > /dev/null 2>&1 && . <(dtags shell bash)
+  command -v dtags-activate > /dev/null 2>&1 && eval "`dtags-activate bash`"
 
   For fish, place in ~/.config/fish/config.fish:
-
-    command -v dtags > /dev/null 2>&1; and dtags shell fish | source
+  command -v dtags-activate > /dev/null 2>&1; and dtags-activate fish | source
 
 And then restart your shell.""".format(version=version['VERSION'])
 
@@ -59,10 +56,12 @@ setup(
     cmdclass={'install': DTagsInstall},
     entry_points={
         'console_scripts': [
-            'e = dtags.commands.execute:main',
-            'tag = dtags.commands.tag:main',
-            'untag = dtags.commands.untag:main',
-            'dtags = dtags.commands.manage:main',
+            'dtags-e = dtags.commands.e:main',
+            'dtags-t = dtags.commands.t:main',
+            'dtags-u = dtags.commands.u:main',
+            'dtags-manage = dtags.commands:manage',
+            'dtags-refresh = dtags.commands:refresh',
+            'dtags-activate = dtags.commands:activate',
         ],
     }
 )

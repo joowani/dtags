@@ -12,9 +12,9 @@ from dtags.utils import close_stdio, abort, finish, expand
 from dtags.version import VERSION
 
 USAGE = """Usage:
-  tag <dir> [<tag>...]
-  tag --help
-  tag --version
+  t <dir> [<tag>...]
+  t --help
+  t --version
 """
 DESCRIPTION = """
 Arguments:
@@ -37,28 +37,28 @@ def main():
     elif head == '--version':
         finish('Version ' + VERSION)
     elif head.startswith('-'):
-        abort(USAGE + 'Invalid argument: ' + style.bad(head))
+        abort(USAGE + 't: invalid argument: ' + style.bad(head))
     path = expand(head)
     invalid_path_chars = get_invalid_path_chars(path)
     if invalid_path_chars:
-        abort('Directory path {} contains bad characters {}'.format(
+        abort('t: directory path {} contains bad characters {}'.format(
             style.bad(path), style.bad_chars(invalid_path_chars)
         ))
     if not os.path.isdir(path):
-        abort('Invalid directory ' + style.bad(path))
+        abort('t: invalid directory: ' + style.bad(path))
     mapping, excluded = load_mapping()
     tags_added = set()
     if not tail:
         tail.append(os.path.basename(path))
     for tag in tail:
         if not tag[0].isalpha():
-            abort('Tag name {} does not start with an alphabet'
+            abort('t: tag name {} does not start with an alphabet'
                   .format(style.bad(tag)))
         if ' ' in tag:
-            abort('Tag name {} contains whitespaces'.format(style.bad(tag)))
+            abort('t: tag name {} contains whitespaces'.format(style.bad(tag)))
         invalid_tag_chars = get_invalid_tag_chars(tag)
         if invalid_tag_chars:
-            abort('Tag name {} contains bad characters {}'.format(
+            abort('t: tag name {} contains bad characters {}'.format(
                 style.bad(tag), style.bad_chars(invalid_tag_chars)
             ))
         if path not in mapping[tag]:
