@@ -1,15 +1,13 @@
 Features
 ========
 
-**dtags** is a lightweight command line tool which lets you:
+**dtags** is a lightweight command line tool with tab-completion which lets you:
 
 -  Tag and un-tag directories
--  Automatically create shell variables for easy access
--  Change directories via tag names
--  Execute commands in multiple directories at the same time
+-  Change directories quickly via tags
+-  Run commands in tagged directories at the same time
+-  Use shell variables to reference tagged directories
 -  Easily manage git repositories, vagrant machines etc.
-
-All commands come with tab-completion.
 
 
 Installation
@@ -43,9 +41,8 @@ Installation
 
 **Step 4**. Restart your shell.
 
-Once installed, you will have **5** commands at your disposal: ``t``, ``u``,
-``d``, ``e`` and ``dtags``. Make sure you don't have name conflicts with any
-existing linux aliases, functions or symlinks etc.
+Once installed, you will have **5** commands at your disposal: 
+``t``, ``u``, ``d``, ``e`` and ``dtags``.
 
 
 Usage Examples
@@ -83,7 +80,7 @@ Execute commands in one or more directories with ``e``:
     ~$ e -p vm git pull     # execute 'git pull' in directories tagged 'vm' in parallel
     ~$ e vm,~/foo ls        # execute 'ls' in directories tagged 'vm' and ~/foo
 
-Display, search and manage directory tags with ``dtags``:
+Display, search and manage tags with ``dtags``:
 
 .. code:: bash
 
@@ -93,17 +90,18 @@ Display, search and manage directory tags with ``dtags``:
     ~$ dtags reverse        # display the tags-to-directories mapping
     ~$ dtags edit           # edit tags and directories via editor like vim
     ~$ dtags clean          # remove invalid or stale tags and directories
-    ~$ dtags commands       # display all available dtags commands
+    ~$ dtags commands       # display all available dtags commands (e.g. t, u, d, e)
 
-You can always use the ``--help`` option to find out more!
 
 If a tag points to a single directory, shell variables are automatically created:
 
 .. code:: bash
 
-    ~$ t ~/some/dir test    # shell variable $test is automatically created
-    ~$ ls $test/foo/bar     # $test can be used to denote the tagged directory
-    ~$ rm $test/file.sh     # $test can be used to denote the tagged directory
+    ~$ t ~/some/dir foo     # shell variable $foo is automatically created
+    ~$ ls $foo/sub/dir      # $foo can be used to denote the tagged directory ~/some/dir
+    ~$ rm $foo/file.sh      # $foo can be used to denote the tagged directory ~/some/dir
+
+You can always use the ``--help`` option to find out more about each command!
 
 
 Technical Notes
@@ -140,3 +138,5 @@ Technical Notes
    -  Don't touch this file at all if possible
    -  If this is deleted, it is auto-generated the next time a dtags
       command is run.
+-  For a shell variable to be created automatically, the tag name must
+   not conflict with environment variable names 
