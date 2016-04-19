@@ -1,12 +1,12 @@
 Features
 ========
 
-**dtags** is a lightweight command line tool with tab-completion which lets you:
+**dtags** is a lightweight command line tool which lets you:
 
 -  Tag and un-tag directories
--  Change directories quickly via tags
--  Run commands in tagged directories at the same time
--  Use shell variables to reference tagged directories
+-  Change directories quickly via tag names
+-  Run commands in multiple directories at once
+-  Use shell variables to reference the tagged directories
 -  Easily manage git repositories, vagrant machines etc.
 
 
@@ -42,7 +42,7 @@ Installation
 **Step 4**. Restart your shell.
 
 Once installed, you will have **5** commands at your disposal: 
-``t``, ``u``, ``d``, ``e`` and ``dtags``.
+``t``, ``u``, ``d``, ``e`` and ``dtags``. All commands come with tab-completion.
 
 
 Usage Examples
@@ -97,9 +97,9 @@ If a tag points to a single directory, shell variables are automatically created
 
 .. code:: bash
 
-    ~$ t ~/some/dir foo     # shell variable $foo is automatically created
-    ~$ ls $foo/sub/dir      # $foo can be used to denote the tagged directory ~/some/dir
-    ~$ rm $foo/file.sh      # $foo can be used to denote the tagged directory ~/some/dir
+    ~$ t ~/some/dir foo     # shell variable '$foo' is automatically created
+    ~$ ls $foo/sub/dir      # $foo can now be used to denote the tagged directory ~/some/dir
+    ~$ rm $foo/file.sh      # $foo can now be used to denote the tagged directory ~/some/dir
 
 You can always use the ``--help`` option to find out more about each command!
 
