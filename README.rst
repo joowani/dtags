@@ -26,7 +26,7 @@ Install the package:
     # You may need to sudo depending on your setup
     ~$ pip install --upgrade dtags
 
-Add the following line at the end of your shell runtime config and reload the shell:
+Add the following line at the end of your shell runtime configuration and reload the shell:
 
 .. code:: bash
 
