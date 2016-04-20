@@ -13,20 +13,20 @@ Features
 Installation
 ============
 
-**Step 1**: Check requirements:
+Check requirements:
 
 -  Python 2.7+ or 3.4+
 -  Recent version of `pip <https://pip.pypa.io>`__
 -  Recent version of Bash, Zsh or Fish with tab-completion enabled
 
-**Step 2**: Install the package:
+Install the package:
 
 .. code:: bash
 
     # You may need to sudo depending on your setup
     ~$ pip install --upgrade dtags
 
-**Step 3**: Add the following line at the end of your shell runtime configuration:
+Add the following line at the end of your shell runtime config and reload the shell:
 
 .. code:: bash
 
@@ -38,8 +38,6 @@ Installation
 
     # For fish, place in ~/.config/fish/config.fish:
     command -v dtags-activate > /dev/null 2>&1; and dtags-activate fish | source
-
-**Step 4**. Restart your shell.
 
 Once installed, you will have **5** commands at your disposal: 
 ``t``, ``u``, ``d``, ``e`` and ``dtags``. All commands come with tab-completion.
