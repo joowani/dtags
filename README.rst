@@ -138,6 +138,6 @@ Technical Notes
    -  Don't touch this file at all if possible
    -  If this is deleted, it is auto-generated the next time a dtags
       command is run.
--  For a shell variable to be created automatically, the tag name must
-   not conflict with environment variable names 
+-  Shell variable is created only if the name does not conflict with 
+   environment variable 
 -  When shell variables are created hyphens are replaced with underscores
