@@ -73,9 +73,9 @@ Execute commands in one or more directories with ``e``:
 
 .. code:: bash
 
-    ~$ e repo git status    # execute 'git status' in directories tagged 'repo'
+    ~$ e repo git status    # execute 'git status' in all directories tagged 'repo'
     ~$ e ~/vm vagrant halt  # execute 'vagrant halt' in directory ~/vm
-    ~$ e -p vm git pull     # execute 'git pull' in directories tagged 'vm' in parallel
+    ~$ e -p vm git pull     # execute 'git pull' in all directories tagged 'vm' in parallel!
     ~$ e vm,~/foo ls        # execute 'ls' in directories tagged 'vm' and ~/foo
 
 Display, search and manage tags with ``dtags``:
@@ -100,6 +100,38 @@ If a tag points to a single directory, shell variables are automatically created
     ~$ rm $foo/file.sh      # $foo can now be used to denote the tagged directory ~/some/dir
 
 You can always use the ``--help`` option to find out more about each command!
+
+More Examples
+=============
+
+Manage git repositories and streamline deployment workflows:
+
+.. code:: bash
+    
+    # Tag your git directories
+    ~$ t ~/project/mobile app
+    ~$ t ~/project/backend app
+    ~$ t ~/project/frontend app
+    ~$ t ~/project/config app
+    
+    # Save yourself some time!
+    ~$ e app git status
+    ~$ e app git checkout v1.7.2
+    ~$ e -p app git pull
+
+Control multiple vagrant machines at the same time:
+
+.. code:: bash
+
+    # Tag all the things
+    ~$ t ~/machines/web vms
+    ~$ t ~/machines/redis vms
+    ~$ t ~/machines/mysql vms
+    ~$ t ~/machines/compute vms
+    
+    # Profit
+    ~$ e -p app vagrant status
+    ~$ e -p app vagrant up
 
 
 Technical Notes
