@@ -36,8 +36,6 @@ def main():
         finish(USAGE + DESCRIPTION)
     elif head == '--version':
         finish('Version ' + VERSION)
-    elif head.startswith('-'):
-        abort(USAGE + 't: invalid argument: ' + style.bad(head))
     path = expand(head)
     invalid_path_chars = get_invalid_path_chars(path)
     if invalid_path_chars:

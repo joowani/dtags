@@ -53,12 +53,12 @@ EDIT_HELP_COMMENTS = """# Format: <dir>,<tag>,<tag>,<tag>...
 # /home/user/app/frontend/web,app,frontend,web
 """
 
-COMMANDS = """Available dtags commands:
-
-t - tag a specified directory
-u - untag a specified directory
-d - go to the specified directory by name/tag
-e - execute a command under a directory by name/tag"""
+COMMANDS = """t: tag a specified directory
+u: untag a specified directory
+d: go to the specified directory
+e: execute command in directories
+p: execute command in parallel
+"""
 
 
 def _edit(args):

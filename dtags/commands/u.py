@@ -36,8 +36,6 @@ def main():
         finish(USAGE + DESCRIPTION)
     elif head == '--version':
         finish('Version ' + VERSION)
-    elif head.startswith('-'):
-        abort(USAGE + 'u: invalid argument: ' + style.bad(head))
     path = expand(head)
     tags_removed = set()
     for tag in tail if tail else mapping.keys():
