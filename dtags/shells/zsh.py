@@ -3,6 +3,7 @@ unalias dtags > /dev/null 2>&1
 unalias t > /dev/null 2>&1
 unalias u > /dev/null 2>&1
 unalias e > /dev/null 2>&1
+unalias p > /dev/null 2>&1
 unalias d > /dev/null 2>&1
 
 function dtags() {{
@@ -23,6 +24,10 @@ function u() {{
 
 function e() {{
     dtags-e $@
+}}
+
+function p() {{
+    dtags-p $@
 }}
 
 function d() {{
@@ -83,7 +88,7 @@ function d() {{
         then
             declare _dtags_dir="$1"
         else
-            printf "$_dtags_dest_err" "$_dtags_usage" "$1"
+            printf "$_dtags_dest_err" "$1"
             return 2
         fi
     elif [[ $_dtags_count = 1 ]]
@@ -113,7 +118,7 @@ function d() {{
         cd "$_dtags_dir"
         return 0
     else
-        printf "$_dtags_dest_err" "$_dtags_usage" "$_dtags_dir"
+        printf "$_dtags_dest_err" "$_dtags_dir"
         return 2
     fi
 }}
@@ -182,6 +187,7 @@ compdef _dtags dtags
 compdef _t t
 compdef _u u
 compdef _e e
+compdef _e p
 compdef _d d
 
 eval "`dtags-refresh zsh`"

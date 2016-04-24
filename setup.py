@@ -56,9 +56,10 @@ setup(
     cmdclass={'install': DTagsInstall},
     entry_points={
         'console_scripts': [
-            'dtags-e = dtags.commands.e:main',
             'dtags-t = dtags.commands.t:main',
             'dtags-u = dtags.commands.u:main',
+            'dtags-e = dtags.commands.e:main',
+            'dtags-p = dtags.commands.p:main',
             'dtags-manage = dtags.commands:manage',
             'dtags-refresh = dtags.commands:refresh',
             'dtags-activate = dtags.commands:activate',

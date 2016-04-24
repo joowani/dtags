@@ -3,6 +3,7 @@ functions -e dtags > /dev/null 2>&1
 functions -e t > /dev/null 2>&1
 functions -e u > /dev/null 2>&1
 functions -e e > /dev/null 2>&1
+functions -e p > /dev/null 2>&1
 functions -e d > /dev/null 2>&1
 
 function dtags
@@ -19,6 +20,10 @@ end
 
 function e
     dtags-e $argv
+end
+
+function p
+    dtags-p $argv
 end
 
 function d
@@ -65,7 +70,7 @@ function d
         if test -d $argv[1]
             set _dtags_dir $argv[1]
         else
-            printf "$_dtags_dest_err" "$_dtags_usage" "$argv[1]"
+            printf "$_dtags_dest_err" "$argv[1]"
             return 2
         end
     else if math "$_dtags_count == 1" > /dev/null
@@ -92,7 +97,7 @@ function d
         cd $_dtags_dir
         return 0
     else
-        printf "$_dtags_dest_err" "$_dtags_usage" "$_dtags_dir"
+        printf "$_dtags_dest_err" "$_dtags_dir"
         return 2
     end
 end
@@ -157,14 +162,18 @@ complete -f -c dtags -n '__dtags_has_first_arg reverse' \
 
 complete -f -c t -n '__dtags_past_first_arg' \
     -a '(__dtags_tags)' -d 'Directory tag'
+
 complete -f -c u -n '__dtags_past_first_arg' \
     -a '(__dtags_tags)' -d 'Directory tag'
+
+complete -f -c e -n '__dtags_no_args' \
+    -a '(__dtags_tags)' -d 'Directory tag'
+
+complete -f -c p -n '__dtags_no_args' \
+    -a '(__dtags_tags)' -d 'Directory tag'
+
 complete -f -c d -n '__dtags_no_args' \
-    -a '(__dtags_tags)' -d 'Directory tag'
-complete -f -c e -n '__dtags_no_args' \
-    -a '(__dtags_tags)' -d 'Directory tag'
-complete -f -c e -n '__dtags_no_args' \
-    -a -p -d 'Execute the commands in parallel'
+-a '(__dtags_tags)' -d 'Directory tag'
 
 dtags-refresh fish | source
 """
