@@ -18,14 +18,6 @@ function u
     dtags-u $argv; and dtags-refresh fish | source
 end
 
-function e
-    dtags-e $argv
-end
-
-function p
-    dtags-p $argv
-end
-
 function d
     set _dtags_usage "{usage}"
     set _dtags_version "{version}"

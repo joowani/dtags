@@ -22,14 +22,6 @@ function u() {{
     dtags-u $@ && eval "`dtags-refresh zsh`"
 }}
 
-function e() {{
-    dtags-e $@
-}}
-
-function p() {{
-    dtags-p $@
-}}
-
 function d() {{
     declare _dtags_usage='{usage}'
     declare _dtags_version='{version}'
