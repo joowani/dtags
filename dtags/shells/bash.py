@@ -153,30 +153,17 @@ _u() {{
 
 _e() {{
     declare cur=${{COMP_WORDS[COMP_CWORD]}}
-    if [[ ${{COMP_CWORD}} -eq 1 ]]
+    if [[ ${{COMP_CWORD}} -eq 1 ]] && [[ -f "{tags_file}" ]]
     then
-        if [[ -f "{tags_file}" ]]
-        then
-            COMPREPLY+=($(compgen -W "`cat {tags_file}`" -- $cur))
-        fi
-        COMPREPLY+=($(compgen -W "-p" -- $cur))
-    elif [[ ${{COMP_CWORD}} -eq 2 && ${{COMP_WORDS[1]}} = -p ]]
-    then
-        if [[ -f "{tags_file}" ]]
-        then
-            COMPREPLY+=($(compgen -W "`cat {tags_file}`" -- $cur))
-        fi
+        COMPREPLY+=($(compgen -W "`cat {tags_file}`" -- $cur))
     fi
 }}
 
 _d() {{
     declare cur=${{COMP_WORDS[COMP_CWORD]}}
-    if [[ ${{COMP_CWORD}} -eq 1 ]]
+    if [[ ${{COMP_CWORD}} -eq 1 ]] && [[ -f "{tags_file}" ]]
     then
-        if [[ -f "{tags_file}" ]]
-        then
-            COMPREPLY+=($(compgen -W "`cat {tags_file}`" -- $cur))
-        fi
+        COMPREPLY+=($(compgen -W "`cat {tags_file}`" -- $cur))
     fi
 }}
 

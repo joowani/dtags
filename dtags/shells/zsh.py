@@ -152,11 +152,6 @@ _e() {{
     if [[ CURRENT -eq 2 ]]
     then
         [[ -f "{tags_file}" ]] && compadd `cat {tags_file}`
-        compadd -- -p
-        _files -/
-    elif [[ CURRENT -eq 3 && $words[2] = -p ]]
-    then
-        [[ -f "{tags_file}" ]] && compadd `cat {tags_file}`
         _files -/
     elif [[ CURRENT -gt 3 ]]
     then
