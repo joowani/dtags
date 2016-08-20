@@ -1,3 +1,22 @@
+Directory Tags for Lazy Progammers
+----------------------------------
+
+.. image:: https://badge.fury.io/py/dtags.svg
+    :target: https://badge.fury.io/py/dtags
+    :alt: Package Version
+
+.. image:: https://img.shields.io/badge/python-2.7%2C%203.4-blue.svg
+    :target: https://github.com/joowani/dtags
+    :alt: Python Versions
+
+.. image:: https://img.shields.io/github/issues/joowani/dtags.svg   
+    :target: https://github.com/joowani/dtags/issues
+    :alt: Issues Open
+
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg   
+    :target: https://raw.githubusercontent.com/joowani/dtags/master/LICENSE
+    :alt: MIT License
+
 Features
 ========
 
