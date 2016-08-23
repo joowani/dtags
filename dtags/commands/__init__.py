@@ -265,16 +265,16 @@ def refresh():
         if config is None:
             abort('dtags: unsupported shell: ' + style.bad(shell_path))
 
-    assign_string = 'set -g {} "{}"' if shell_name == 'fish' else '{}="{}"'
+    declare_str = 'set -g {} "{}"' if shell_name == 'fish' else '{}="{}"'
     mapping, _ = load_mapping()
-    print('\n'.join(
-        assign_string.format(tag.replace('-', '_'), paths.pop())
-        for tag, paths in mapping.items()
-        if len(paths) == 1 and
-        tag.replace('-', '_') not in os.environ and
-        not get_invalid_tag_chars(tag)
-    ))
 
-
-
-
+    declarations = []
+    for tag, paths in mapping.items():
+        cleaned_tag = tag.replace('-', '_').replace('#', '_')
+        if (
+            cleaned_tag not in os.environ and
+            not get_invalid_tag_chars(tag) and
+            len(paths) == 1
+        ):
+            declarations.append(declare_str.format(cleaned_tag, paths.pop()))
+    print('\n'.join(declarations))
