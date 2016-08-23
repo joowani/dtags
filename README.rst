@@ -1,5 +1,5 @@
-Directory Tags for Lazy Progammers
-----------------------------------
+Directory Tags for Lazy Programmers
+-----------------------------------
 
 .. image:: https://badge.fury.io/py/dtags.svg
     :target: https://badge.fury.io/py/dtags
@@ -197,4 +197,4 @@ Technical Notes
    -  Refrain from touching this file
    -  This file is auto-generated whenever a dtags command is run.
 -  A shell variable is created only if its name does not conflict with environment variables
--  When shell variables are created, any hyphens in the name are replaced with underscores
+-  When shell variables are created, any disallowed characters in the name are replaced with underscores
