@@ -167,9 +167,9 @@ Control multiple vagrant machines at the same time:
 Technical Notes
 ===============
 
+-  **dtags** is currently not supported on Windows
 -  The directory-to-tags mapping is stored in ``~/.dtags/mapping``
 -  Tags are also stored on their own in ``~/.dtags/tags`` for tab-completion
--  ``p`` is currently not fully supported on Windows
 -  ``p`` cannot execute interactive commands that wait on input
 -  ``p`` spawns child processes and redirects all output to temp files and then to stdout
 -  ``p`` does not retain font colors due to shell limitations
