@@ -24,7 +24,9 @@ To activate dtags, place the following line in your shell config:
   For fish, place in ~/.config/fish/config.fish:
   command -v dtags-activate > /dev/null 2>&1; and dtags-activate fish | source
 
-And then restart your shell.""".format(version=version['VERSION'])
+And then restart your shell.
+
+Note: dtags is NOT supported on windows""".format(version=version['VERSION'])
 
 
 class DTagsInstall(install):

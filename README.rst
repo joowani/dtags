@@ -22,10 +22,8 @@ Features
 
 **dtags** is a lightweight command line tool which lets you:
 
--  Tag and un-tag directories
--  Run commands in multiple directories in parallel
--  Change directories quickly via tag names
--  Use shell variables to reference directories
+-  Tag directories and jump between them quickly by tag names
+-  Run commands inside tagged directories in parallel
 -  Easily manage git repositories, vagrant machines etc.
 
 
@@ -34,7 +32,8 @@ Installation
 
 Check requirements:
 
--  Python 2.7+ or 3.4+
+-  Python 2.7.x, 3.4.x, 3.5.x or 3.6.x
+-  Supported operating systems: Linux, OS X, Ubuntu on Windows
 -  Recent version of `pip <https://pip.pypa.io>`__
 -  Recent version of Bash, Zsh or Fish with tab-completion enabled
 
@@ -42,8 +41,8 @@ Install the package:
 
 .. code:: bash
 
-    # You may need to sudo depending on your setup
-    ~$ pip install --upgrade dtags
+    # You may need to sudo depending on your environment setup
+    ~$ pip install dtags
 
 Add the following line at the end of your shell runtime configuration and reload the shell:
 
@@ -167,7 +166,7 @@ Control multiple vagrant machines at the same time:
 Technical Notes
 ===============
 
--  **dtags** is currently not supported on Windows
+-  **dtags** is currently *not* supported on Windows (only Ubuntu on Windows)
 -  The directory-to-tags mapping is stored in ``~/.dtags/mapping``
 -  Tags are also stored on their own in ``~/.dtags/tags`` for tab-completion
 -  ``p`` cannot execute interactive commands that wait on input
