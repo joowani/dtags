@@ -43,6 +43,8 @@ setup(
     author_email='joohwan.oh@outlook.com',
     url='https://github.com/joowani/dtags',
     packages=find_packages(),
+    license='MIT',
+    tests_require=['pytest'],
     classifiers=[
         'License :: OSI Approved :: MIT License',
         'Intended Audience :: Developers',
