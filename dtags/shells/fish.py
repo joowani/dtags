@@ -37,7 +37,7 @@ function d
         set _dtags_choice "{choice}"
         set -g _dtags_prompt "{prompt}"
     end
-    if math "1 >" (count $argv) > /dev/null
+    if [ 1 -gt (count $argv) ] > /dev/null
         cd $HOME
         return 0
     else if [ $argv[1] = "--help" ]
@@ -52,20 +52,20 @@ function d
     else if echo "$argv[1]" | grep -q -E '^-' > /dev/null
         printf "$_dtags_arg_err" "$_dtags_usage" "$argv[1]"
         return 2
-    else if math "1 <" (count $argv) > /dev/null
+    else if [ 1 -lt (count $argv) ] > /dev/null
         printf "%sd: too many arguments\n" "$_dtags_usage"
         return 2
     end
     set _dtags_dirs (grep -F ,$argv[1], {mapping_file} | cut -d',' -f1)
     set -g _dtags_count (count $_dtags_dirs)
-    if math "$_dtags_count == 0" > /dev/null
+    if [ $_dtags_count -eq 0 ] > /dev/null
         if test -d $argv[1]
             set _dtags_dir $argv[1]
         else
             printf "$_dtags_dest_err" "$argv[1]"
             return 2
         end
-    else if math "$_dtags_count == 1" > /dev/null
+    else if [ $_dtags_count -eq 1 ] > /dev/null
         set _dtags_dir $_dtags_dirs[1]
     else
         for i in (seq $_dtags_count)
@@ -79,7 +79,7 @@ function d
         if not echo "$_dtags_idx" | grep -q -E '^[0-9]+$' > /dev/null
             printf "$_dtags_input_err" "$_dtags_idx"
             return 2
-        else if math "$_dtags_idx > $_dtags_count" > /dev/null
+        else if [ $_dtags_idx -gt $_dtags_count ] > /dev/null
             printf "$_dtags_idx_err" "$_dtags_idx"
             return 2
         end
