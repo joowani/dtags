@@ -58,3 +58,6 @@ target/
 
 # PyCharm
 .idea
+
+# Pytest Cache
+.pytest_cache/

@@ -16,8 +16,6 @@ import locale
 import shutil
 import subprocess
 
-import pytest
-
 from dtags import CFG_DIR, MAPPING_FILE
 from dtags.chars import TAG_CHARS
 from dtags.version import VERSION
@@ -108,7 +106,6 @@ def run(command, shell=None):
     return '\n'.join(valid_output_lines)
 
 
-@pytest.mark.first
 def test_init():
     """Test if the commands work as expected when no tags are defined"""
     expected = 'Nothing to list\n'
@@ -121,7 +118,6 @@ def test_init():
     assert run('dtags clean') == 'Nothing to clean\n'
 
 
-@pytest.mark.second
 def test_t():
     """Test if 'tag' works as expected."""
     # Test basic argument handling
@@ -171,7 +167,6 @@ def test_t():
     assert run('t {} {} bar baz foo'.format(dir2, tag2)) == 'Nothing to do\n'
 
 
-@pytest.mark.third
 def test_dtags():
     """Test if 'dtags' works as expected."""
     # Test basic argument handling
@@ -251,7 +246,6 @@ def test_dtags():
         assert run('dtags-refresh fish | source', shell='fish') == ''
 
 
-@pytest.mark.fourth
 def test_d():
     """Test if the 'd' command works as expected."""
     # Test basic argument handling
@@ -271,7 +265,6 @@ def test_d():
     assert run('d {}'.format(bad_dir)) == expected_error
 
 
-@pytest.mark.fifth
 def test_e():
     """Test if the 'e' command works as expected."""
     # Test argument handling
@@ -302,7 +295,6 @@ def test_e():
         assert m.format(loc='{} #foo'.format(dir2), out=dir2) in output
 
 
-@pytest.mark.sixth
 def test_p():
     """Test if the 'e' command works as expected."""
     # Test argument handling
@@ -333,7 +325,6 @@ def test_p():
         assert m.format(loc='{} #foo'.format(dir2), out=dir2) in output
 
 
-@pytest.mark.seventh
 def test_u():
     """Test if 'untag' works as expected."""
     # Test basic argument handling
@@ -367,7 +358,6 @@ def test_u():
     assert run('dtags list {} foo bar baz'.format(tag1)) == 'Nothing to list\n'
 
 
-@pytest.mark.last
 def test_bad_mapping():
     """Test if bad mapping is handled properly."""
     assert run('dtags clean') == 'Nothing to clean\n'

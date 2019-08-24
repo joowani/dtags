@@ -5,15 +5,15 @@ Directory Tags for Lazy Programmers
     :target: https://badge.fury.io/py/dtags
     :alt: Package Version
 
-.. image:: https://img.shields.io/badge/python-2.7%2C%203.4-blue.svg
+.. image:: https://img.shields.io/badge/python-2.7%2C%203.4%2C%203.5%2C%203.6%2C%203.7-blue.svg
     :target: https://github.com/joowani/dtags
     :alt: Python Versions
 
-.. image:: https://img.shields.io/github/issues/joowani/dtags.svg   
+.. image:: https://img.shields.io/github/issues/joowani/dtags.svg
     :target: https://github.com/joowani/dtags/issues
     :alt: Issues Open
 
-.. image:: https://img.shields.io/badge/license-MIT-blue.svg   
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target: https://raw.githubusercontent.com/joowani/dtags/master/LICENSE
     :alt: MIT License
 
@@ -32,7 +32,7 @@ Installation
 
 Check requirements:
 
--  Python 2.7.x, 3.4.x, 3.5.x or 3.6.x
+-  Python 2.7, 3.4, 3.5, 3.6 or 3.7
 -  Supported operating systems: Linux, OS X, Ubuntu on Windows
 -  Recent version of `pip <https://pip.pypa.io>`__
 -  Recent version of Bash, Zsh or Fish with tab-completion enabled
