@@ -1,0 +1,13 @@
+[tool.coverage.run]
+omit = ["dtags/version.py", "setup.py"]
+
+[tool.isort]
+profile = "black"
+
+[tool.pytest.ini_options]
+addopts = "-vv -p no:warnings"
+minversion = "6.0"
+testpaths = ["tests"]
+
+[tool.setuptools_scm]
+write_to = "dtags/version.py"

@@ -1,118 +1,58 @@
-from __future__ import unicode_literals
-
 import sys
+from pathlib import Path
+from typing import Optional, Set
 
 TTY = sys.stdout.isatty()
 
-# Normal color
-BLACK = '\033[38;5;240m'
-BLUE = '\033[38;5;27m'
-BROWN = '\033[38;5;88m'
-GRAY = '\033[38;5;249m'
-GREEN = '\033[38;5;154m'
-ORANGE = '\033[38;5;208m'
-PURPLE = '\033[38;5;141m'
-RED = '\033[38;5;009m'
-SKY = '\033[38;5;39m'
-TURQUOISE = '\033[38;5;37m'
-YELLOW = '\033[38;5;214m'
+BLUE = "\033[38;5;39m"
+RED = "\033[38;5;009m"
+GREEN = "\033[38;5;154m"
+BOLD = "\033[1m"
+CLEAR = "\033[0m"
 
-# Bold
-BLACK_BOLD = '\033[1;38;5;240m'
-BLUE_BOLD = '\033[1;38;5;27m'
-BROWN_BOLD = '\033[1;38;5;88m'
-GRAY_BOLD = '\033[1;38;5;249m'
-GREEN_BOLD = '\033[1;38;5;154m'
-ORANGE_BOLD = '\033[1;38;5;208m'
-PURPLE_BOLD = '\033[1;38;5;141m'
-RED_BOLD = '\033[1;38;5;009m'
-SKY_BOLD = '\033[1;38;5;39m'
-TURQUOISE_BOLD = '\033[1;38;5;37m'
-YELLOW_BOLD = '\033[1;38;5;214m'
-
-# Clear format
-CLEAR = '\033[0m'
+TAG_PREFIX = "@"
+CMD_PREFIX = "$"
 
 
-def tag(value, highlight=False, tty=TTY):
-    """Style the directory tag name.
+def command(value: str, tty: bool = TTY) -> str:
+    return f"{BOLD}{CMD_PREFIX} {value}{CLEAR}" if tty else f"{CMD_PREFIX} {value}"
 
-    :param value: the directory tag name to style
-    :param highlight: True iff the tag is to be highlighted
-    :param tty: True iff the output is going to a terminal
-    :return: the styled directory tag name
-    """
+
+def path(value: Path, tty: bool = TTY) -> str:
+    return f"{BLUE}{value.as_posix()}{CLEAR}" if tty else value.as_posix()
+
+
+def tag(value: str, tty: bool = TTY) -> str:
+    return f"{BOLD}{TAG_PREFIX}{CLEAR}{value}" if tty else f"{TAG_PREFIX}{value}"
+
+
+def mapping(dirpath: Path, tags: Set[str], tty: bool = TTY) -> str:
+    buffer = [path(dirpath)]
     if tty:
-        if highlight:
-            return BLACK + '#' + GREEN_BOLD + value + CLEAR
+        buffer.extend(f"{BOLD}{TAG_PREFIX}{CLEAR}{t}" for t in sorted(tags))
+    else:
+        buffer.extend(f"{TAG_PREFIX}{t}" for t in sorted(tags))
+
+    return " ".join(buffer)
+
+
+def diff(
+    dirpath: Path,
+    add_tags: Optional[Set[str]] = None,
+    del_tags: Optional[Set[str]] = None,
+    tty: bool = TTY,
+) -> str:
+    buffer = [path(dirpath)]
+    if add_tags:
+        if tty:
+            buffer.extend(f"{GREEN}+{TAG_PREFIX}{t}{CLEAR}" for t in sorted(add_tags))
         else:
-            return BLACK + '#' + GRAY + value + CLEAR
-    return '#' + value
+            buffer.extend(f"+{TAG_PREFIX}{t}" for t in sorted(add_tags))
 
-
-def path(value, highlight=False, tty=TTY):
-    """Style the directory path.
-
-    :param value: the directory path to style
-    :param highlight: True iff the path is to be highlighted
-    :param tty: True iff the output is going to a terminal
-    :return: the styled directory path
-    """
-    if tty:
-        if highlight:
-            return GREEN_BOLD + value + CLEAR
+    if del_tags:
+        if tty:
+            buffer.extend(f"{RED}-{TAG_PREFIX}{t}{CLEAR}" for t in sorted(del_tags))
         else:
-            return SKY + value + CLEAR
-    return value
+            buffer.extend(f"-{TAG_PREFIX}{t}" for t in sorted(del_tags))
 
-
-def bad_chars(value, tty=TTY):
-    """Style the set of invalid characters in directory tags/paths.
-
-    :param value: the set of invalid characters to style
-    :param tty: True iff the output is going to a terminal
-    :return: the styled invalid characters
-    """
-    if tty:
-        return ' '.join("{}{}{}".format(RED, c, CLEAR) for c in value)
-    return ' '.join("{}".format(c) for c in value)
-
-
-def cmd(value, tty=TTY):
-    """Style the linux command string.
-
-    :param value: the linux command string to style
-    :param tty: True iff the output is going to a terminal
-    :return: the styled command
-    """
-    return '{}{}{}'.format(GREEN, value, CLEAR) if tty else value
-
-
-def bad(value, tty=TTY):
-    """Style the invalid entry (e.g. directory path, tag, argument).
-
-    :param value: the invalid value to style
-    :param tty: True iff the output is going to a terminal
-    :return: the styled value
-    """
-    return '{}{}{}'.format(RED, value, CLEAR) if tty else value
-
-
-def msg(value, tty=TTY):
-    """Style the message.
-
-    :param value: the message to style
-    :param tty: True iff the output is going to a terminal
-    :return: the styled message
-    """
-    return '{}{}{}'.format(BLACK, value, CLEAR) if tty else value
-
-
-def sign(value, tty=TTY):
-    """Style the sign (e.g '+' and '-' symbols).
-
-    :param value: the sign to style
-    :param tty: True iff the output is going to a terminal
-    :return: the styled sign
-    """
-    return '{}{}{}'.format(ORANGE_BOLD, value, CLEAR) if tty else value
+    return " ".join(buffer)

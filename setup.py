@@ -1,70 +1,53 @@
-from __future__ import print_function
+from setuptools import find_packages, setup
 
-from setuptools import setup, find_packages
-from setuptools.command.install import install
-
-version = {}
-with open('./dtags/version.py') as fp:
-    exec(fp.read(), version)
-
-with open('./README.rst') as fp:
-    description = fp.read()
-
-
-post_install_msg = """
-Finished installing dtags {version}.
-To activate dtags, place the following line in your shell config:
-
-  For zsh, place in ~/.zshrc:
-  command -v dtags-activate > /dev/null 2>&1 && eval "`dtags-activate zsh`"
-
-  For bash, place in ~/.bashrc (or ~/.bash_profile for OS X):
-  command -v dtags-activate > /dev/null 2>&1 && eval "`dtags-activate bash`"
-
-  For fish, place in ~/.config/fish/config.fish:
-  command -v dtags-activate > /dev/null 2>&1; and dtags-activate fish | source
-
-And then restart your shell.
-
-Note: dtags is NOT supported on windows""".format(version=version['VERSION'])
-
-
-class DTagsInstall(install):
-    def run(self):
-        install.run(self)
-        self.execute(lambda: None, [], msg=post_install_msg)
+with open("README.md") as fp:
+    long_description = fp.read()
 
 setup(
-    name='dtags',
-    version=version['VERSION'],
-    description='Directory Tags for Lazy Programmers',
-    long_description=description,
-    author='Joohwan Oh',
-    author_email='joohwan.oh@outlook.com',
-    url='https://github.com/joowani/dtags',
-    packages=find_packages(),
-    license='MIT',
-    tests_require=['pytest'],
-    classifiers=[
-        'License :: OSI Approved :: MIT License',
-        'Intended Audience :: Developers',
-        'Operating System :: MacOS :: MacOS X',
-        'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 3',
-        'Natural Language :: English',
-        'Topic :: Utilities',
-    ],
-    cmdclass={'install': DTagsInstall},
-    entry_points={
-        'console_scripts': [
-            'e = dtags.commands.e:main',
-            'p = dtags.commands.p:main',
-            'dtags-t = dtags.commands.t:main',
-            'dtags-u = dtags.commands.u:main',
-            'dtags-manage = dtags.commands:manage',
-            'dtags-refresh = dtags.commands:refresh',
-            'dtags-activate = dtags.commands:activate',
+    name="dtags",
+    description="Directory Tags for Lazy Programmers",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    author="Joohwan Oh",
+    author_email="joohwan.oh@outlook.com",
+    url="https://github.com/joowani/dtags",
+    keywords=["cli", "terminal"],
+    packages=find_packages(exclude=["tests"]),
+    include_package_data=True,
+    python_requires=">=3.6",
+    license="MIT",
+    use_scm_version=True,
+    setup_requires=["setuptools_scm"],
+    install_requires=["python-slugify>=4.0.1"],
+    extras_require={
+        "dev": [
+            "black",
+            "flake8>=3.8.4",
+            "isort>=5.0.0",
+            "mypy>=0.790",
+            "pre-commit>=2.9.3",
+            "pytest>=6.0.0",
+            "pytest-cov>=2.0.0",
         ],
-    }
+    },
+    entry_points={
+        "console_scripts": [
+            "dtags-activate = dtags.commands.activate:execute",
+            "dtags-d = dtags.commands.d:execute",
+            "tag = dtags.commands.tag:execute",
+            "untag = dtags.commands.untag:execute",
+            "run = dtags.commands.run:execute",
+            "tags = dtags.commands.tags:execute",
+        ],
+    },
+    classifiers=[
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Natural Language :: English",
+        "Operating System :: MacOS",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: Unix",
+        "Programming Language :: Python :: 3",
+        "Topic :: Utilities",
+    ],
 )
