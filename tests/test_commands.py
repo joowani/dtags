@@ -39,6 +39,12 @@ def test_command_activate(capsys):
     activate.execute(["bash"])
     assert_stdout(capsys, activate.BASH_ACTIVATE_SCRIPT)
 
+    activate.execute(["zsh"])
+    assert_stdout(capsys, activate.ZSH_ACTIVATE_SCRIPT)
+
+    activate.execute(["fish"])
+    assert_stdout(capsys, activate.FISH_ACTIVATE_SCRIPT)
+
     activate.execute([])
     assert_stderr(
         capsys,
@@ -212,6 +218,14 @@ def test_command_run(capsys, dir1, dir2, dir3):
         {dir2.as_posix()} +@foo
         {dir3.as_posix()} +@foo
         Tags saved successfully
+        """,
+    )
+    run.execute(["foo", "--cmd"])
+    assert_stderr(
+        capsys,
+        f"""
+        usage: {run.USAGE}
+        run: error: the following arguments are required: -c/--cmd
         """,
     )
     run.execute(["foo", "--cmd", "ls"])

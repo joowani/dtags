@@ -53,10 +53,11 @@ def execute(args: Optional[List[str]] = None) -> None:
         help="command to execute",
     )
     parsed_args = parser.parse_args(sys.argv[1:] if args is None else args)
+
     if not parsed_args.command:
         parser.error("the following arguments are required: -c/--cmd")
-
-    run_command(parsed_args.destinations, parsed_args.command)
+    else:
+        run_command(parsed_args.destinations, parsed_args.command)
 
 
 def run_command(destinations: List[str], command: List[str]) -> None:
