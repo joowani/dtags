@@ -4,8 +4,6 @@ from typing import List, Optional
 from dtags.commons import dtags_command, get_argparser
 
 USAGE = "dtags-activate {bash,fish,zsh}"
-DESCRIPTION = "Activate dtags"
-
 BASH_ACTIVATE_SCRIPT = """
 unalias tag > /dev/null 2>&1
 unalias untag > /dev/null 2>&1
@@ -28,15 +26,25 @@ d() {
         fi
     fi
 }
+_dtags_elem_not_in () {
+    local e match="$1"
+    shift
+    for e; do [[ "$e" == "$match" ]] && return 1; done
+    return 0
+}
 _dtags_d() {
     declare CWORD="${COMP_WORDS[COMP_CWORD]}"
     if [[ -f ~/.dtags/completion ]]
     then
         COMPREPLY+=($(compgen -W "$(cat ~/.dtags/completion)" -- "${CWORD}"))
     fi
+    if _dtags_elem_not_in "-t" "${COMP_WORDS[@]}"
+    then
+        COMPREPLY+=($(compgen -W "-t" -- "${CWORD}"))
+    fi
     if [[ ${COMP_CWORD} -eq 1 ]]
     then
-        COMPREPLY+=($(compgen -W "-h --help -v --version -t --tag" -- "${CWORD}"))
+        COMPREPLY+=($(compgen -W "-h --help -v --version" -- "${CWORD}"))
     fi
 }
 _dtags_tag() {
@@ -45,7 +53,11 @@ _dtags_tag() {
     then
         COMPREPLY+=($(compgen -W "$(cat ~/.dtags/completion)" -- "${CWORD}"))
     fi
-    COMPREPLY+=($(compgen -W "-t -y --yes -r --replace" -- "${CWORD}"))
+    if _dtags_elem_not_in "-t" "${COMP_WORDS[@]}"
+    then
+        COMPREPLY+=($(compgen -W "-t" -- "${CWORD}"))
+    fi
+    COMPREPLY+=($(compgen -W "-y --yes -r --replace" -- "${CWORD}"))
     if [[ ${COMP_CWORD} -eq 1 ]]
     then
         COMPREPLY+=($(compgen -W "-h --help -v --version" -- "${CWORD}"))
@@ -57,7 +69,11 @@ _dtags_untag() {
     then
         COMPREPLY+=($(compgen -W "$(cat ~/.dtags/completion)" -- "${CWORD}"))
     fi
-    COMPREPLY+=($(compgen -W "-t -y --yes" -- "${CWORD}"))
+    if _dtags_elem_not_in "-t" "${COMP_WORDS[@]}"
+    then
+        COMPREPLY+=($(compgen -W "-t" -- "${CWORD}"))
+    fi
+    COMPREPLY+=($(compgen -W "-y --yes" -- "${CWORD}"))
     if [[ ${COMP_CWORD} -eq 1 ]]
     then
         COMPREPLY+=($(compgen -W "-h --help -v --version" -- "${CWORD}"))
@@ -82,7 +98,10 @@ _dtags_run() {
     then
         COMPREPLY+=($(compgen -W "$(cat ~/.dtags/completion)" -- "${CWORD}"))
     fi
-    COMPREPLY+=($(compgen -W "-c --cmd" -- "${CWORD}"))
+    if _dtags_elem_not_in "-c" "${COMP_WORDS[@]}"
+    then
+        COMPREPLY+=($(compgen -W "-c" -- "${CWORD}"))
+    fi
     if [[ ${COMP_CWORD} -eq 1 ]]
     then
         COMPREPLY+=($(compgen -W "-h --help -v --version" -- "${CWORD}"))
@@ -95,93 +114,13 @@ complete -d -F _dtags_d d
 complete -d -F _dtags_run run
 """
 
-ZSH_ACTIVATE_SCRIPT = """
-unalias tag > /dev/null 2>&1
-unalias untag > /dev/null 2>&1
-unalias tags > /dev/null 2>&1
-unalias d > /dev/null 2>&1
-unalias run > /dev/null 2>&1
-d() {
-    if [[ $# -eq 1 ]] && [[ -d $1 ]]
-    then
-        cd "${1}"
-    elif [[ $# -eq 1 ]] && [[ $1 = - ]]
-    then
-        cd -
-    else
-        dtags-d "$@"
-        if [[ -f ~/.dtags/destination ]]
-        then
-            cd "$(cat ~/.dtags/destination)"
-            rm -f ~/.dtags/destination
-        fi
-    fi
-}
-_dtags_d() {
-    _files -/
-    if [[ -f ~/.dtags/completion ]]
-    then
-        compadd $(cat ~/.dtags/completion)
-    fi
-    if [[ CURRENT -eq 2 ]]
-    then
-        _arguments '-h' '--help' '-v' '--version' '-t' '--tag'
-    fi
-}
-_dtags_tag() {
-    _files -/
-    if [[ -f ~/.dtags/completion ]]
-    then
-        compadd $(cat ~/.dtags/completion)
-    fi
-    _arguments '-t' '-y' '--yes' '-r' '--replace'
-    if [[ CURRENT -eq 2 ]]
-    then
-        _arguments '-h' '--help' '-v' '--version'
-    fi
-}
-_dtags_untag() {
-    _files -/
-    if [[ -f ~/.dtags/completion ]]
-    then
-        compadd $(cat ~/.dtags/completion)
-    fi
-    _arguments '-t' '-y' '--yes'
-    if [[ CURRENT -eq 2 ]]
-    then
-        _arguments '-h' '--help' '-v' '--version'
-    fi
-}
-_dtags_run() {
-    _files -/
-    if [[ -f ~/.dtags/completion ]]
-    then
-        compadd $(cat ~/.dtags/completion)
-    fi
-    _arguments '-c' '--cmd'
-    if [[ CURRENT -eq 2 ]]
-    then
-        _arguments '-h' '--help' '-v' '--version'
-    fi
-}
-_dtags_tags() {
-    if [[ -f ~/.dtags/completion ]]
-    then
-        compadd $(cat ~/.dtags/completion)
-    fi
-    _arguments '-j' '--json' '-r' '--reverse' '-y' '--yes'
-    _arguments '-c' '--clean' '-p' '--purge' '-t'
-    if [[ CURRENT -eq 2 ]]
-    then
-        _arguments '-h' '--help' '-v' '--version'
-    fi
-}
-compdef _dtags_tag tag
-compdef _dtags_untag untag
-compdef _dtags_tags tags
-compdef _dtags_d d
-compdef _dtags_run run
+ZSH_ACTIVATE_SCRIPT = (
+    """
+autoload -U +X compinit && compinit
+autoload -U +X bashcompinit && bashcompinit
 """
+    + BASH_ACTIVATE_SCRIPT
+)
 
 FISH_ACTIVATE_SCRIPT = """
 functions -e tag > /dev/null 2>&1
@@ -265,7 +204,7 @@ complete -c run -s c -l cmd -d 'Flag'
 def execute(args: Optional[List[str]] = None) -> None:
     parser = get_argparser(
         prog="dtags-activate",
-        desc=DESCRIPTION,
+        desc="Activate dtags",
         usage=USAGE,
     )
     parser.add_argument(
