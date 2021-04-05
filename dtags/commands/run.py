@@ -74,7 +74,9 @@ def run_command(destinations: List[str], command: List[str]) -> None:
         else:
             tag = normalize_tag(dest)
             if tag in tag_to_dirpaths:
-                dirpaths.update(tag_to_dirpaths[tag])
+                for dirpath in tag_to_dirpaths[tag]:
+                    if dirpath.is_dir():
+                        dirpaths.add(dirpath)
 
     return_code = 0
     for dirpath in sorted(dirpaths):
