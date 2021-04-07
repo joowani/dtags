@@ -45,15 +45,6 @@ def test_command_activate(capsys):
     activate.execute(["fish"])
     assert_stdout(capsys, activate.FISH_ACTIVATE_SCRIPT)
 
-    activate.execute([])
-    assert_stderr(
-        capsys,
-        f"""
-        usage: {activate.USAGE}
-        dtags-activate: error: the following arguments are required: shell
-        """,
-    )
-
 
 def test_command_d(capsys, dir1, dir2, dir3, monkeypatch):
     d.execute([])

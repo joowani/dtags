@@ -27,12 +27,15 @@ pip install dtags
 
 For Bash, add the following line in `~/.bashrc`:
 ```shell
-source <(dtags-activate bash)
+source <(dtags-activate)
 ```
 
 For Zsh, add the following line in `~/.zshrc`:
 ```shell
-source <(dtags-activate zsh)
+autoload -U +X compinit && compinit
+autoload -U +X bashcompinit && bashcompinit
+
+source <(dtags-activate)
 ```
 
 For Fish, add the following line in `~/.config/fish/config.fish`:
@@ -44,7 +47,7 @@ For [Git Bash on Windows](https://git-scm.com/download/win), add the following l
 in `~/.bashrc`:
 ```shell
 export DTAGS_GIT_BASH=1
-source <(dtags-activate bash)
+source <(dtags-activate)
 ```
 
 Restart your shell. The following commands will be available after:

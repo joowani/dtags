@@ -114,13 +114,7 @@ complete -d -F _dtags_d d
 complete -d -F _dtags_run run
 """
 
-ZSH_ACTIVATE_SCRIPT = (
-    """
-autoload -U +X compinit && compinit
-autoload -U +X bashcompinit && bashcompinit
-"""
-    + BASH_ACTIVATE_SCRIPT
-)
+ZSH_ACTIVATE_SCRIPT = BASH_ACTIVATE_SCRIPT
 
 FISH_ACTIVATE_SCRIPT = """
 functions -e tag > /dev/null 2>&1
@@ -209,7 +203,10 @@ def execute(args: Optional[List[str]] = None) -> None:
     )
     parser.add_argument(
         "shell",
-        choices=["bash", "fish", "zsh"],
+        nargs="?",
+        choices=("bash", "fish", "zsh"),
+        const="bash",
+        default="bash",
         help="Name of the shell",
     )
     parsed_args = parser.parse_args(sys.argv[1:] if args is None else args)
