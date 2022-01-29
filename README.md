@@ -2,7 +2,7 @@
 
 [![Build](https://github.com/joowani/dtags/actions/workflows/build.yaml/badge.svg)](https://github.com/joowani/dtags/actions/workflows/build.yaml)
 [![CodeQL](https://github.com/joowani/dtags/actions/workflows/codeql.yaml/badge.svg)](https://github.com/joowani/dtags/actions/workflows/codeql.yaml)
-[![codecov](https://codecov.io/gh/joowani/dtags/branch/main/graph/badge.svg?token=znq5L1yeSz)](https://codecov.io/gh/joowani/dtags)
+[![codecov](https://codecov.io/gh/joowani/dtags/branch/main/graph/badge.svg?token=22PHXFEy61)](https://codecov.io/gh/joowani/dtags)
 [![PyPI version](https://badge.fury.io/py/dtags.svg)](https://badge.fury.io/py/dtags)
 [![GitHub license](https://img.shields.io/github/license/joowani/dtags?color=brightgreen)](https://github.com/joowani/dtags/blob/main/LICENSE)
 ![Python version](https://img.shields.io/badge/python-3.6%2B-blue)
